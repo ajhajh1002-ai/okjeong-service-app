@@ -1,231 +1,979 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>봉사기록</title>
-
-<style>
-body{margin:0;font-family:sans-serif;background:#f4f4f4}
-.container{padding:10px;max-width:700px;margin:auto}
-.card{background:white;padding:12px;border-radius:10px;margin-bottom:10px}
-.title{font-weight:bold;margin-bottom:8px}
-
-.header{
-display:flex;
-justify-content:space-between;
-align-items:center;
-margin-bottom:10px;
-}
-
-button{border:none;border-radius:8px;padding:8px;font-size:13px}
-.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:5px}
-
-.black{background:black;color:white}
-.gray{background:#ddd}
-.blue{background:#2196F3;color:white}
-.green{background:#4CAF50;color:white}
-
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>양주옥정회중 3집단 봉사기록</title>
+  <style>
+    :root{
+      --bg:#f3f4f6;
+      --bg2:#e5e7eb;
+      --card:#ffffff;
+      --text:#111827;
+      --muted:#6b7280;
+      --line:#e5e7eb;
+      --black:#111111;
+      --black-2:#1f2937;
+      --green:#166534;
+      --green-bg:#dcfce7;
+      --red:#991b1b;
+      --red-bg:#fee2e2;
+      --purple:#6d28d9;
+      --purple-bg:#ede9fe;
+      --blue:#1d4ed8;
+      --blue-bg:#dbeafe;
+      --amber:#92400e;
+      --amber-bg:#fef3c7;
+      --shadow:0 10px 30px rgba(17,24,39,.08);
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+      color:var(--text);
+      background:
+        radial-gradient(circle at top left, #e0e7ff 0%, transparent 32%),
+        radial-gradient(circle at top right, #dbeafe 0%, transparent 28%),
+        linear-gradient(180deg, #f8fafc 0%, #f3f4f6 100%);
+    }
+    .shell{
+      max-width:920px;
+      margin:0 auto;
+      padding:14px 14px 30px;
+    }
+    .topbar{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      margin-bottom:12px;
+    }
+    .brand{
+      display:flex;
+      flex-direction:column;
+      gap:2px;
+    }
+    .brand h1{
+      margin:0;
+      font-size:22px;
+      line-height:1.2;
+      font-weight:800;
+      letter-spacing:-.02em;
+    }
+    .brand p{
+      margin:0;
+      color:var(--muted);
+      font-size:12px;
+    }
+    .card{
+      background:rgba(255,255,255,.92);
+      backdrop-filter:blur(10px);
+      border:1px solid rgba(255,255,255,.7);
+      border-radius:18px;
+      padding:14px;
+      margin-bottom:12px;
+      box-shadow:var(--shadow);
+    }
+    .title-row{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:10px;
+      margin-bottom:10px;
+    }
+    .title{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      margin:0;
+      font-size:17px;
+      font-weight:800;
+    }
+    .title-badge{
+      width:28px;
+      height:28px;
+      border-radius:999px;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      background:var(--black);
+      color:#fff;
+      font-size:12px;
+      font-weight:800;
+      flex:none;
+    }
+    .sub{
+      font-size:12px;
+      color:var(--muted);
+    }
+    .row{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+    }
+    .row > *{flex:1}
+    .row-auto{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+      align-items:center;
+    }
+    input,select,textarea{
+      width:100%;
+      border:1px solid var(--line);
+      background:#fff;
+      border-radius:12px;
+      padding:12px 12px;
+      font-size:15px;
+      color:var(--text);
+      outline:none;
+    }
+    textarea{
+      min-height:86px;
+      resize:vertical;
+    }
+    input:focus,select:focus,textarea:focus{
+      border-color:#c7d2fe;
+      box-shadow:0 0 0 4px rgba(99,102,241,.12);
+    }
+    button,.file-btn{
+      border:none;
+      border-radius:12px;
+      padding:12px 14px;
+      font-size:14px;
+      font-weight:700;
+      cursor:pointer;
+      transition:.15s ease;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:6px;
+      text-align:center;
+    }
+    button:active,.file-btn:active{transform:scale(.99)}
+    .btn-black{background:var(--black);color:#fff}
+    .btn-gray{background:#e5e7eb;color:#111827}
+    .btn-outline{background:#fff;color:#111827;border:1px solid var(--line)}
+    .btn-green{background:var(--green-bg);color:var(--green)}
+    .btn-red{background:var(--red-bg);color:var(--red)}
+    .btn-purple{background:var(--purple-bg);color:var(--purple)}
+    .btn-blue{background:var(--blue-bg);color:var(--blue)}
+    .btn-soft{background:#f8fafc;color:#111827;border:1px solid var(--line)}
+    .mini{
+      padding:8px 10px;
+      font-size:12px;
+      border-radius:999px;
+      width:auto;
+      flex:none;
+    }
+    .icon{
+      width:18px;height:18px;display:inline-flex;align-items:center;justify-content:center;
+      border-radius:999px;background:rgba(255,255,255,.25);font-size:11px;font-weight:800;
+    }
+    .grid-2{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+    .grid-4{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+    .member-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+    .member-btn{
+      width:100%;
+      justify-content:space-between;
+      align-items:flex-start;
+      min-height:72px;
+      padding:10px 12px;
+      border-radius:14px;
+      text-align:left;
+    }
+    .member-main{
+      display:flex;
+      flex-direction:column;
+      gap:2px;
+      align-items:flex-start;
+    }
+    .member-name{
+      font-size:14px;
+      font-weight:800;
+      line-height:1.2;
+    }
+    .member-role{
+      font-size:11px;
+      opacity:.9;
+    }
+    .pill{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      padding:5px 8px;
+      border-radius:999px;
+      font-size:11px;
+      font-weight:800;
+      white-space:nowrap;
+    }
+    .pill-dark{background:#111827;color:#fff}
+    .pill-soft{background:rgba(255,255,255,.55);color:#111827}
+    .summary{
+      display:grid;
+      grid-template-columns:repeat(2,1fr);
+      gap:8px;
+      margin-bottom:10px;
+    }
+    .summary-item{
+      border-radius:16px;
+      padding:12px;
+      font-weight:800;
+    }
+    .summary-item .k{
+      font-size:12px;
+      margin-bottom:6px;
+      color:#374151;
+    }
+    .summary-item .v{
+      font-size:22px;
+      line-height:1;
+    }
+    .report-line,.record-line,.manage-line{
+      border:1px solid var(--line);
+      border-radius:14px;
+      padding:10px 12px;
+      background:#fff;
+      margin-bottom:8px;
+    }
+    .report-line strong,.manage-line strong{font-size:14px}
+    .record-line{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
+    .record-left{display:flex;flex-direction:column;gap:2px}
+    .record-month{font-weight:800}
+    .record-year{font-size:11px;color:var(--muted)}
+    .manage-line{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:8px;
+    }
+    .manage-left{
+      display:flex;
+      flex-direction:column;
+      gap:2px;
+    }
+    .helper{
+      font-size:12px;color:var(--muted)
+    }
+    .login-wrap{
+      min-height:100vh;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:18px;
+      background:
+        radial-gradient(circle at top left, #c7d2fe 0%, transparent 34%),
+        radial-gradient(circle at bottom right, #bfdbfe 0%, transparent 34%),
+        linear-gradient(180deg, #eef2ff 0%, #f8fafc 100%);
+    }
+    .login-card{
+      width:100%;
+      max-width:390px;
+      background:rgba(255,255,255,.95);
+      backdrop-filter:blur(14px);
+      border-radius:24px;
+      padding:22px;
+      box-shadow:0 30px 80px rgba(17,24,39,.12);
+      border:1px solid rgba(255,255,255,.7);
+    }
+    .login-title{
+      font-size:24px;
+      font-weight:900;
+      margin:0 0 6px;
+      text-align:center;
+      letter-spacing:-.03em;
+    }
+    .login-sub{
+      text-align:center;
+      color:var(--muted);
+      font-size:13px;
+      margin-bottom:14px;
+    }
+    .spacer{height:6px}
+    .toast{
+      position:fixed;
+      left:50%;
+      bottom:18px;
+      transform:translateX(-50%) translateY(20px);
+      background:#111827;
+      color:#fff;
+      padding:12px 14px;
+      border-radius:999px;
+      font-size:13px;
+      font-weight:700;
+      opacity:0;
+      pointer-events:none;
+      transition:.2s ease;
+      z-index:9999;
+      box-shadow:0 12px 30px rgba(0,0,0,.22);
+      white-space:nowrap;
+    }
+    .toast.show{
+      opacity:1;
+      transform:translateX(-50%) translateY(0);
+    }
+    .empty{
+      text-align:center;
+      color:var(--muted);
+      padding:14px 8px;
+      border:1px dashed var(--line);
+      border-radius:14px;
+      background:#fafafa;
+    }
+    @media (min-width:760px){
+      .summary{grid-template-columns:repeat(4,1fr)}
+      .member-grid{grid-template-columns:repeat(3,1fr)}
+    }
+  </style>
 </head>
-
 <body>
-<div id="app"></div>
+  <div id="app"></div>
+  <div id="toast" class="toast"></div>
 
 <script>
+const APP_TITLE = '양주옥정회중 3집단 봉사기록';
+const LOGIN_ID = 'okjeong';
+const LOGIN_PW = '6104';
+const STORAGE_KEY = 'okjeong_service_final_v7';
 
-const ID="okjeong";
-const PW="6104";
-
-let login=false;
-
-let db=JSON.parse(localStorage.getItem("db")||"{}");
-let aux=JSON.parse(localStorage.getItem("aux")||"{}");
-
-let members=[
-"엄미자","김영윤","임혁","최수림","안영옥",
-"강언용","이명희","안진호","고다롱","박명철",
-"김솔","김광태","김하윤","이동국","김금선","최성남"
+const DEFAULT_MEMBERS = [
+  '엄미자','김영윤','임혁','최수림','안영옥',
+  '강언용','이명희','안진호','고다롱','박명철',
+  '김솔','김광태','김하윤','이동국','김금선','최성남'
 ];
+const DEFAULT_PIONEERS = ['엄미자','김영윤','임혁','최수림','안영옥'];
+const SERVICE_MONTHS = [9,10,11,12,1,2,3,4,5,6,7,8];
 
-let pioneers=["엄미자","김영윤","임혁","최수림","안영옥"];
+function currentYm(){
+  const d = new Date();
+  return d.toISOString().slice(0,7);
+}
+function getCurrentServiceYear(){
+  const d = new Date();
+  const y = d.getFullYear();
+  const m = d.getMonth() + 1;
+  return m >= 9 ? y + 1 : y;
+}
+function getServiceYearFromYm(ym){
+  if(!ym || !ym.includes('-')) return getCurrentServiceYear();
+  const parts = ym.split('-').map(Number);
+  return parts[1] >= 9 ? parts[0] + 1 : parts[0];
+}
+function monthLabel(ym){
+  const [y,m] = ym.split('-');
+  return y + '년 ' + Number(m) + '월';
+}
+function esc(v){
+  return String(v ?? '')
+    .replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;')
+    .replace(/'/g,'&#39;');
+}
+function toast(msg){
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(window.__toastTimer);
+  window.__toastTimer = setTimeout(()=>el.classList.remove('show'), 1400);
+}
+function loadStore(){
+  const raw = localStorage.getItem(STORAGE_KEY);
+  if(raw){
+    try { return JSON.parse(raw); } catch(e) {}
+  }
+  const oldDb = JSON.parse(localStorage.getItem('db') || '{}');
+  const oldAux = JSON.parse(localStorage.getItem('aux') || '{}');
+  const oldMembers = JSON.parse(localStorage.getItem('members') || JSON.stringify(DEFAULT_MEMBERS));
+  const oldPioneers = JSON.parse(localStorage.getItem('pioneers') || JSON.stringify(DEFAULT_PIONEERS));
+  return {
+    members: oldMembers,
+    pioneers: oldPioneers,
+    auxByMonth: oldAux,
+    records: oldDb
+  };
+}
+function saveStore(){
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(store));
+  // 구버전 호환 키도 같이 저장
+  localStorage.setItem('db', JSON.stringify(store.records));
+  localStorage.setItem('aux', JSON.stringify(store.auxByMonth));
+  localStorage.setItem('members', JSON.stringify(store.members));
+  localStorage.setItem('pioneers', JSON.stringify(store.pioneers));
+}
 
-let month=new Date().toISOString().slice(0,7);
-let reportMonth=month;
+let store = loadStore();
+let ui = {
+  isAuth: false,
+  page: 'main',
+  inputYm: currentYm(),
+  reportYm: currentYm(),
+  activeName: store.members[0] || '',
+  selectedPerson: '',
+  selectedServiceYear: getCurrentServiceYear(),
+  reportCopied: false,
+  personalCopied: false
+};
 
-let selected="";
-let person="";
-let serviceYear=new Date().getFullYear();
+function allKnownNames(){
+  const set = new Set(store.members);
+  Object.values(store.records || {}).forEach(monthObj=>{
+    Object.keys(monthObj || {}).forEach(n=>set.add(n));
+  });
+  return Array.from(set);
+}
+function ensureUiSelections(){
+  const known = allKnownNames();
+  if(!known.includes(ui.selectedPerson)) ui.selectedPerson = known[0] || '';
+  if(!store.members.includes(ui.activeName)) ui.activeName = store.members[0] || '';
+}
+ensureUiSelections();
 
-let copy1=false;
-let copy2=false;
+function getMonthRecords(ym){
+  if(!store.records[ym]) store.records[ym] = {};
+  return store.records[ym];
+}
+function getAuxList(ym){
+  if(!store.auxByMonth[ym]) store.auxByMonth[ym] = [];
+  return store.auxByMonth[ym];
+}
+function resolveType(name, ym){
+  const rec = (store.records[ym] || {})[name];
+  if(rec && rec.type) return rec.type;
+  if(store.pioneers.includes(name)) return '정규';
+  if(getAuxList(ym).includes(name)) return '보조';
+  return '전도인';
+}
+function ensureRecord(name, ym){
+  const monthObj = getMonthRecords(ym);
+  if(!monthObj[name]){
+    monthObj[name] = {
+      type: resolveType(name, ym),
+      time: '',
+      study: '',
+      participate: '',
+      note: ''
+    };
+  }
+  if(!monthObj[name].type) monthObj[name].type = resolveType(name, ym);
+  return monthObj[name];
+}
+function isSubmitted(name, ym){
+  const rec = (store.records[ym] || {})[name];
+  if(!rec) return false;
+  const type = resolveType(name, ym);
+  if(type === '전도인') return rec.participate === 'O' || rec.participate === 'X';
+  return String(rec.time || '').trim() !== '';
+}
+function getNamesForReport(ym){
+  const set = new Set(store.members);
+  Object.keys(store.records[ym] || {}).forEach(n=>set.add(n));
+  return Array.from(set);
+}
+function summaryForMonth(ym){
+  const names = getNamesForReport(ym);
+  let regular = 0, auxiliary = 0, publisher = 0, participation = 0;
+  names.forEach(name=>{
+    const type = resolveType(name, ym);
+    const rec = (store.records[ym] || {})[name] || {};
+    if(type === '정규') regular++;
+    if(type === '보조') auxiliary++;
+    if(type === '전도인') publisher++;
+    if(type === '전도인'){
+      if(rec.participate === 'O') participation++;
+    }else{
+      if(String(rec.time || '').trim() !== '') participation++;
+    }
+  });
+  return { regular, auxiliary, publisher, participation };
+}
+function copyDone(key){
+  ui[key] = true;
+  render();
+  setTimeout(()=>{ ui[key] = false; render(); }, 1500);
+}
+async function copyText(text, key){
+  try{
+    await navigator.clipboard.writeText(text);
+  }catch(e){
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+  }
+  copyDone(key);
+  toast('복사 완료');
+}
+function buildGroupReportText(){
+  const ym = ui.reportYm;
+  const lines = [monthLabel(ym) + ' 집단 봉사보고'];
+  getNamesForReport(ym).forEach(name=>{
+    const type = resolveType(name, ym);
+    const rec = (store.records[ym] || {})[name] || {};
+    if(type === '전도인'){
+      const p = rec.participate === 'O' ? '참여' : rec.participate === 'X' ? '미참여' : '-';
+      lines.push(`${name} ${type} ${p}${rec.note ? ' 비고:' + rec.note : ''}`);
+    }else{
+      lines.push(`${name} ${type} 시간:${rec.time || '-'} 연구:${rec.study || '-'}${rec.note ? ' 비고:' + rec.note : ''}`);
+    }
+  });
+  return lines.join('\\n');
+}
+function buildPersonalText(){
+  const name = ui.selectedPerson;
+  const sy = Number(ui.selectedServiceYear);
+  const lines = [`${name} ${sy} 봉사연도`];
+  SERVICE_MONTHS.forEach(m=>{
+    const y = m >= 9 ? sy - 1 : sy;
+    const ym = `${y}-${String(m).padStart(2,'0')}`;
+    const rec = (store.records[ym] || {})[name] || {};
+    const type = rec.type || '';
+    if(type === '전도인'){
+      const p = rec.participate === 'O' ? '참여' : rec.participate === 'X' ? '미참여' : '-';
+      lines.push(`${m}월 (${y}) ${type || '-'} ${p}${rec.note ? ' 비고:' + rec.note : ''}`);
+    }else{
+      lines.push(`${m}월 (${y}) ${type || '-'} 시간:${rec.time || '-'} 연구:${rec.study || '-'}${rec.note ? ' 비고:' + rec.note : ''}`);
+    }
+  });
+  return lines.join('\\n');
+}
+function downloadBackup(){
+  const blob = new Blob([JSON.stringify(store, null, 2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `okjeong-backup-${new Date().toISOString().slice(0,10)}.json`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(()=>URL.revokeObjectURL(url), 1000);
+  toast('백업 파일 저장');
+}
+function openRestore(){
+  document.getElementById('restore-file').click();
+}
+function restoreBackup(evt){
+  const file = evt.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = ()=>{
+    try{
+      const parsed = JSON.parse(reader.result);
+      store = {
+        members: parsed.members || [...DEFAULT_MEMBERS],
+        pioneers: parsed.pioneers || [...DEFAULT_PIONEERS],
+        auxByMonth: parsed.auxByMonth || {},
+        records: parsed.records || {}
+      };
+      ensureUiSelections();
+      saveStore();
+      render();
+      toast('복구 완료');
+    }catch(e){
+      alert('복구 실패: JSON 파일을 확인하세요.');
+    }
+    evt.target.value = '';
+  };
+  reader.readAsText(file);
+}
 
-function key(m){return m;}
+function login(){
+  const id = document.getElementById('login-id').value.trim();
+  const pw = document.getElementById('login-pw').value.trim();
+  if(id === LOGIN_ID && pw === LOGIN_PW){
+    ui.isAuth = true;
+    ui.page = 'main';
+    render();
+    toast('로그인 완료');
+  }else{
+    alert('아이디 또는 비밀번호가 올바르지 않습니다.');
+  }
+}
+function logout(){
+  ui.isAuth = false;
+  render();
+}
+function goManage(){
+  ui.page = 'manage';
+  render();
+}
+function goMain(){
+  ui.page = 'main';
+  render();
+}
+function setInputYm(v){
+  ui.inputYm = v || currentYm();
+  if(!store.members.includes(ui.activeName)) ui.activeName = store.members[0] || '';
+  render();
+}
+function setReportYm(v){
+  ui.reportYm = v || currentYm();
+  render();
+}
+function toggleAux(name){
+  const ym = ui.inputYm;
+  if(store.pioneers.includes(name)) return;
+  const arr = getAuxList(ym);
+  if(arr.includes(name)) store.auxByMonth[ym] = arr.filter(x=>x!==name);
+  else store.auxByMonth[ym] = [...arr, name];
 
-function getType(name,m){
-if(pioneers.includes(name)) return "정규";
-if(aux[m]?.includes(name)) return "보조";
-return "전도인";
+  const rec = (store.records[ym] || {})[name];
+  if(rec) rec.type = resolveType(name, ym);
+
+  saveStore();
+  render();
+}
+function openMember(name){
+  ui.activeName = name;
+  render();
+}
+function setParticipation(v){
+  const rec = ensureRecord(ui.activeName, ui.inputYm);
+  rec.type = '전도인';
+  rec.participate = v;
+  saveStore();
+  render();
+}
+function setField(field, value){
+  const rec = ensureRecord(ui.activeName, ui.inputYm);
+  rec.type = resolveType(ui.activeName, ui.inputYm);
+  rec[field] = value;
+  saveStore();
+}
+function explicitSave(){
+  saveStore();
+  toast('저장됨');
+  render();
+}
+function addMember(){
+  const name = prompt('추가할 이름을 입력하세요');
+  if(!name) return;
+  const n = name.trim();
+  if(!n) return;
+  if(store.members.includes(n)) return alert('이미 있는 성원입니다.');
+  store.members.push(n);
+  ui.activeName = n;
+  if(!ui.selectedPerson) ui.selectedPerson = n;
+  saveStore();
+  render();
+}
+function removeMember(name){
+  if(!confirm(`${name} 성원을 현재 집단 목록에서 제거할까요? 기존 기록은 보존됩니다.`)) return;
+  store.members = store.members.filter(x=>x!==name);
+  store.pioneers = store.pioneers.filter(x=>x!==name);
+  Object.keys(store.auxByMonth).forEach(ym=>{
+    store.auxByMonth[ym] = (store.auxByMonth[ym] || []).filter(x=>x!==name);
+  });
+  ensureUiSelections();
+  saveStore();
+  render();
+}
+function togglePioneer(name){
+  if(store.pioneers.includes(name)){
+    store.pioneers = store.pioneers.filter(x=>x!==name);
+  }else{
+    store.pioneers.push(name);
+    Object.keys(store.auxByMonth).forEach(ym=>{
+      store.auxByMonth[ym] = (store.auxByMonth[ym] || []).filter(x=>x!==name);
+    });
+  }
+  saveStore();
+  render();
+}
+function serviceYearOptions(){
+  const arr = [];
+  const max = Math.max(getCurrentServiceYear(), 2025);
+  for(let y = 2025; y <= max; y++) arr.push(y);
+  return arr.reverse();
+}
+
+function renderLogin(){
+  return `
+    <div class="login-wrap">
+      <div class="login-card">
+        <h1 class="login-title">${APP_TITLE}</h1>
+        <div class="login-sub">옥정 3집단 전용 시스템</div>
+        <input id="login-id" placeholder="아이디" />
+        <div class="spacer"></div>
+        <input id="login-pw" type="password" placeholder="비밀번호" />
+        <div class="spacer"></div>
+        <button class="btn-black" style="width:100%" onclick="login()">로그인</button>
+      </div>
+    </div>
+  `;
+}
+
+function renderManage(){
+  return `
+    <div class="shell">
+      <div class="topbar">
+        <div class="brand">
+          <h1>집단관리</h1>
+          <p>성원 추가/삭제 및 정규 지정</p>
+        </div>
+        <button class="btn-black mini" onclick="goMain()">뒤로</button>
+      </div>
+
+      <div class="card">
+        <div class="title-row">
+          <div class="title"><span class="title-badge">관</span>집단성원 관리</div>
+        </div>
+        <div class="helper" style="margin-bottom:10px">정규로 지정된 성원은 보조 신청 목록에서 자동 제외됩니다.</div>
+        <button class="btn-outline" style="width:100%;margin-bottom:10px" onclick="addMember()">+ 성원 추가</button>
+        ${store.members.map(name=>`
+          <div class="manage-line">
+            <div class="manage-left">
+              <strong>${esc(name)}</strong>
+              <span class="helper">기존 기록은 유지됩니다.</span>
+            </div>
+            <div class="row-auto">
+              <button class="${store.pioneers.includes(name)?'btn-black':'btn-gray'} mini" onclick="togglePioneer('${esc(name)}')">
+                ${store.pioneers.includes(name)?'정규':'일반'}
+              </button>
+              <button class="btn-red mini" onclick="removeMember('${esc(name)}')">제거</button>
+            </div>
+          </div>
+        `).join('') || `<div class="empty">현재 성원이 없습니다.</div>`}
+      </div>
+    </div>
+  `;
+}
+
+function renderMain(){
+  ensureUiSelections();
+  const ym = ui.inputYm;
+  const reportYm = ui.reportYm;
+  const inputMonthRecords = getMonthRecords(ym);
+  const activeName = ui.activeName;
+  const activeType = activeName ? resolveType(activeName, ym) : '';
+  const activeRec = activeName ? ensureRecord(activeName, ym) : null;
+  const auxList = getAuxList(ym);
+  const submitCount = store.members.filter(n=>isSubmitted(n, ym)).length;
+  const submitRate = store.members.length ? Math.round(submitCount / store.members.length * 100) : 0;
+  const notSubmitted = store.members.filter(n=>!isSubmitted(n, ym));
+  const reportSummary = summaryForMonth(reportYm);
+  const reportText = buildGroupReportText();
+  const allPeople = allKnownNames();
+  const serviceYearRows = SERVICE_MONTHS.map(m=>{
+    const y = m >= 9 ? Number(ui.selectedServiceYear) - 1 : Number(ui.selectedServiceYear);
+    const key = `${y}-${String(m).padStart(2,'0')}`;
+    const rec = (store.records[key] || {})[ui.selectedPerson] || {};
+    const type = rec.type || '';
+    const detail = type === '전도인'
+      ? ((rec.participate === 'O' ? '참여' : rec.participate === 'X' ? '미참여' : '-') + (rec.note ? ' / 비고: ' + rec.note : ''))
+      : (`시간 ${rec.time || '-'} / 연구 ${rec.study || '-'}${rec.note ? ' / 비고: ' + rec.note : ''}`);
+    return `
+      <div class="record-line">
+        <div class="record-left">
+          <div class="record-month">${m}월</div>
+          <div class="record-year">${y}년</div>
+        </div>
+        <div style="flex:1;text-align:right">
+          <div style="font-weight:800">${type || '-'}</div>
+          <div class="helper">${esc(detail)}</div>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  const personalTotal = SERVICE_MONTHS.reduce((acc, m)=>{
+    const y = m >= 9 ? Number(ui.selectedServiceYear) - 1 : Number(ui.selectedServiceYear);
+    const key = `${y}-${String(m).padStart(2,'0')}`;
+    const rec = (store.records[key] || {})[ui.selectedPerson] || {};
+    acc.time += Number(rec.time || 0);
+    acc.study += Number(rec.study || 0);
+    return acc;
+  }, {time:0, study:0});
+
+  return `
+    <div class="shell">
+      <div class="topbar">
+        <div class="brand">
+          <h1>${APP_TITLE}</h1>
+          <p>모바일 최적화 · 집단 보고 · 개인 기록</p>
+        </div>
+        <div class="row-auto">
+          <button class="btn-outline mini" onclick="logout()">로그아웃</button>
+          <button class="btn-black mini" onclick="goManage()">집단관리</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="title-row">
+          <div class="title"><span class="title-badge">데</span>데이터 관리</div>
+        </div>
+        <div class="row">
+          <button class="btn-black" onclick="downloadBackup()">백업(JSON)</button>
+          <button class="btn-outline" onclick="openRestore()">복구(JSON)</button>
+        </div>
+        <input id="restore-file" type="file" accept="application/json" style="display:none" onchange="restoreBackup(event)" />
+      </div>
+
+      <div class="card">
+        <div class="title-row">
+          <div class="title"><span class="title-badge">입</span>월별 입력</div>
+          <div class="sub">현재 선택 월 기준</div>
+        </div>
+        <input type="month" min="2025-01" value="${esc(ym)}" onchange="setInputYm(this.value)" />
+
+        <div style="margin-top:10px" class="summary">
+          <div class="summary-item" style="background:var(--green-bg)">
+            <div class="k">제출률</div>
+            <div class="v">${submitRate}%</div>
+          </div>
+          <div class="summary-item" style="background:var(--red-bg)">
+            <div class="k">미제출</div>
+            <div class="v">${notSubmitted.length}</div>
+          </div>
+        </div>
+
+        <div class="helper" style="margin-bottom:10px">
+          ${notSubmitted.length ? '미제출: ' + esc(notSubmitted.join(', ')) : '이번 달은 모두 입력되었습니다.'}
+        </div>
+
+        <div class="title-row" style="margin-top:6px">
+          <div class="title" style="font-size:15px"><span class="title-badge" style="background:var(--purple)">보</span>이번 달 보조P</div>
+        </div>
+        <div class="row-auto" style="margin-bottom:12px">
+          ${store.members.filter(n=>!store.pioneers.includes(n)).map(name=>`
+            <button class="${auxList.includes(name)?'btn-purple':'btn-gray'} mini" onclick="toggleAux('${esc(name)}')">${esc(name)}</button>
+          `).join('') || `<div class="empty" style="width:100%">보조 신청 대상 성원이 없습니다.</div>`}
+        </div>
+
+        <div class="member-grid">
+          ${store.members.map(name=>{
+            const submitted = isSubmitted(name, ym);
+            const type = resolveType(name, ym);
+            return `
+              <button class="member-btn ${submitted?'btn-green':'btn-red'}" onclick="openMember('${esc(name)}')">
+                <span class="member-main">
+                  <span class="member-name">${esc(name)}</span>
+                  <span class="member-role">(${type})</span>
+                </span>
+                <span class="pill ${submitted?'pill-dark':'pill-soft'}">${submitted?'제출':'미제출'}</span>
+              </button>
+            `;
+          }).join('')}
+        </div>
+
+        ${activeName ? `
+          <div class="card" style="margin:12px 0 0;background:#fafafa;border:1px solid var(--line);box-shadow:none">
+            <div class="title-row">
+              <div>
+                <div class="title" style="font-size:15px;margin-bottom:2px"><span class="title-badge" style="background:var(--black-2)">인</span>${esc(activeName)}</div>
+                <div class="sub">구분: ${activeType}</div>
+              </div>
+              <span class="pill ${isSubmitted(activeName, ym)?'pill-dark':'pill-soft'}">${isSubmitted(activeName, ym)?'입력 완료':'입력 필요'}</span>
+            </div>
+
+            ${activeType === '전도인' ? `
+              <div class="row">
+                <button class="${activeRec.participate==='O'?'btn-black':'btn-outline'}" onclick="setParticipation('O')">참여</button>
+                <button class="${activeRec.participate==='X'?'btn-black':'btn-outline'}" onclick="setParticipation('X')">미참여</button>
+              </div>
+              <div style="height:8px"></div>
+              <textarea placeholder="비고" oninput="setField('note', this.value)">${esc(activeRec.note || '')}</textarea>
+            ` : `
+              <input placeholder="시간" value="${esc(activeRec.time || '')}" oninput="setField('time', this.value)" />
+              <div style="height:8px"></div>
+              <input placeholder="연구" value="${esc(activeRec.study || '')}" oninput="setField('study', this.value)" />
+              <div style="height:8px"></div>
+              <textarea placeholder="비고" oninput="setField('note', this.value)">${esc(activeRec.note || '')}</textarea>
+            `}
+            <button class="btn-black" style="width:100%;margin-top:10px" onclick="explicitSave()">저장</button>
+          </div>
+        ` : ''}
+      </div>
+
+      <div class="card">
+        <div class="title-row">
+          <div class="title"><span class="title-badge">보</span>집단보고</div>
+          <div class="sub">독립 필터</div>
+        </div>
+
+        <input type="month" min="2025-01" value="${esc(reportYm)}" onchange="setReportYm(this.value)" />
+
+        <div class="summary" style="margin-top:10px">
+          <div class="summary-item" style="background:var(--blue-bg)">
+            <div class="k">정규</div>
+            <div class="v">${reportSummary.regular}</div>
+          </div>
+          <div class="summary-item" style="background:var(--purple-bg)">
+            <div class="k">보조</div>
+            <div class="v">${reportSummary.auxiliary}</div>
+          </div>
+          <div class="summary-item" style="background:#e5e7eb">
+            <div class="k">전도인</div>
+            <div class="v">${reportSummary.publisher}</div>
+          </div>
+          <div class="summary-item" style="background:var(--green-bg)">
+            <div class="k">참여</div>
+            <div class="v">${reportSummary.participation}</div>
+          </div>
+        </div>
+
+        <div style="margin-top:10px">
+          ${getNamesForReport(reportYm).map(name=>{
+            const rec = (store.records[reportYm] || {})[name] || {};
+            const type = resolveType(name, reportYm);
+            if(type === '전도인'){
+              const p = rec.participate === 'O' ? '참여' : rec.participate === 'X' ? '미참여' : '-';
+              return `<div class="report-line"><strong>${esc(name)}</strong> · ${type} · ${p}${rec.note ? ' · 비고: ' + esc(rec.note) : ''}</div>`;
+            }
+            return `<div class="report-line"><strong>${esc(name)}</strong> · ${type} · 시간 ${esc(rec.time || '-')} · 연구 ${esc(rec.study || '-')} ${rec.note ? '· 비고: ' + esc(rec.note) : ''}</div>`;
+          }).join('') || `<div class="empty">해당 월 보고 데이터가 없습니다.</div>`}
+        </div>
+
+        <button class="${ui.reportCopied?'btn-black':'btn-gray'}" style="width:100%;margin-top:10px" onclick="copyText(buildGroupReportText(),'reportCopied')">
+          ${ui.reportCopied ? '복사됨' : '집단보고 복사'}
+        </button>
+      </div>
+
+      <div class="card">
+        <div class="title-row">
+          <div class="title"><span class="title-badge">개</span>개인기록</div>
+          <div class="sub">봉사연도 9월 ~ 다음 해 8월</div>
+        </div>
+
+        <div class="row">
+          <select onchange="ui.selectedPerson=this.value; render()">
+            ${allPeople.map(name=>`<option value="${esc(name)}" ${ui.selectedPerson===name?'selected':''}>${esc(name)}</option>`).join('')}
+          </select>
+          <select onchange="ui.selectedServiceYear=Number(this.value); render()">
+            ${serviceYearOptions().map(y=>`<option value="${y}" ${Number(ui.selectedServiceYear)===y?'selected':''}>${y} 봉사연도</option>`).join('')}
+          </select>
+        </div>
+
+        <div class="summary" style="margin-top:10px">
+          <div class="summary-item" style="background:var(--amber-bg)">
+            <div class="k">시간 합계</div>
+            <div class="v">${personalTotal.time}</div>
+          </div>
+          <div class="summary-item" style="background:var(--blue-bg)">
+            <div class="k">연구 합계</div>
+            <div class="v">${personalTotal.study}</div>
+          </div>
+        </div>
+
+        <div style="margin-top:10px">${serviceYearRows || `<div class="empty">기록이 없습니다.</div>`}</div>
+
+        <button class="${ui.personalCopied?'btn-black':'btn-gray'}" style="width:100%;margin-top:10px" onclick="copyText(buildPersonalText(),'personalCopied')">
+          ${ui.personalCopied ? '복사됨' : '개인기록 복사'}
+        </button>
+      </div>
+    </div>
+  `;
 }
 
 function render(){
-
-if(!login){
-app.innerHTML=`
-<div class="container">
-<div class="card">
-<div class="title">로그인</div>
-<input id="id"><br><br>
-<input id="pw" type="password"><br><br>
-<button onclick="doLogin()">로그인</button>
-</div></div>`;
-return;
-}
-
-if(!db[month]) db[month]={};
-if(!aux[month]) aux[month]=[];
-
-app.innerHTML=`
-<div class="container">
-
-<div class="header">
-<div class="title">봉사기록</div>
-<button onclick="alert('집단관리 구현됨')">집단관리</button>
-</div>
-
-<div class="card">
-<div class="title">월별 입력</div>
-<input type="month" value="${month}" onchange="month=this.value;render()">
-
-<div class="grid">
-${members.map(m=>`
-<button class="${db[month][m]?'black':'gray'}"
-onclick="selected='${m}';render()">
-${m} (${getType(m,month)})
-</button>
-`).join("")}
-</div>
-
-${selected?inputBox():''}
-</div>
-
-<div class="card">
-<div class="title">집단보고</div>
-<input type="month" value="${reportMonth}" onchange="reportMonth=this.value;render()">
-<pre>${report()}</pre>
-<button class="${copy1?'black':'gray'}" onclick="copyReport()">복사</button>
-</div>
-
-<div class="card">
-<div class="title">개인기록</div>
-
-<div style="display:flex;gap:5px">
-<select onchange="person=this.value;render()">
-${members.map(m=>`<option>${m}</option>`).join("")}
-</select>
-
-<select onchange="serviceYear=this.value;render()">
-${[2025,2026,2027].map(y=>`<option>${y}</option>`).join("")}
-</select>
-</div>
-
-${personal()}
-
-<button class="${copy2?'black':'gray'}" onclick="copyPersonal()">복사</button>
-
-</div>
-
-</div>
-`;
-}
-
-function inputBox(){
-let d=db[month][selected]||{};
-let t=getType(selected,month);
-
-return `
-<div class="card">
-${t==="전도인"?`
-<button onclick="setPart('O')">참여</button>
-<button onclick="setPart('X')">미참여</button>
-<textarea onchange="setNote(this.value)">${d.note||''}</textarea>
-`:
-`
-<input value="${d.time||''}" onchange="setVal('time',this.value)">
-<input value="${d.study||''}" onchange="setVal('study',this.value)">
-<textarea onchange="setNote(this.value)">${d.note||''}</textarea>
-`}
-<button onclick="save()">저장</button>
-</div>`;
-}
-
-function report(){
-let t="";
-members.forEach(m=>{
-let d=db[reportMonth]?.[m]||{};
-let type=getType(m,reportMonth);
-
-if(type==="전도인"){
-t+=`${m} ${type} ${d.participate||'-'} ${d.note||''}\n`;
-}else{
-t+=`${m} ${type} ${d.time||'-'} ${d.study||'-'} ${d.note||''}\n`;
-}
-});
-return t;
-}
-
-function personal(){
-if(!person) return "";
-
-let out="";
-for(let m=9;m<=12;m++) out+=row(serviceYear-1,m);
-for(let m=1;m<=8;m++) out+=row(serviceYear,m);
-return out;
-}
-
-function row(y,m){
-let k=`${y}-${String(m).padStart(2,'0')}`;
-let d=db[k]?.[person]||{};
-return `<div>${m}월 ${d.time||d.participate||'-'}</div>`;
-}
-
-function copyReport(){
-navigator.clipboard.writeText(report());
-copy1=true;
-setTimeout(()=>{copy1=false;render()},1500);
-render();
-}
-
-function copyPersonal(){
-navigator.clipboard.writeText(personal());
-copy2=true;
-setTimeout(()=>{copy2=false;render()},1500);
-render();
-}
-
-function setVal(k,v){
-if(!db[month][selected]) db[month][selected]={};
-db[month][selected][k]=v;save();
-}
-
-function setPart(v){
-if(!db[month][selected]) db[month][selected]={};
-db[month][selected].participate=v;save();
-}
-
-function setNote(v){
-if(!db[month][selected]) db[month][selected]={};
-db[month][selected].note=v;save();
-}
-
-function save(){localStorage.setItem("db",JSON.stringify(db));}
-
-function doLogin(){
-if(id.value===ID && pw.value===PW){login=true;render();}
+  const app = document.getElementById('app');
+  app.innerHTML = ui.isAuth ? (ui.page === 'manage' ? renderManage() : renderMain()) : renderLogin();
 }
 
 render();
-
 </script>
 </body>
 </html>
