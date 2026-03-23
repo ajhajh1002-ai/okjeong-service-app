@@ -6,14 +6,14 @@
 <title>양주옥정회중 3집단 봉사기록</title>
 
 <style>
-body {font-family: sans-serif; background:#f5f5f5; padding:15px;}
-.card {background:white; padding:15px; border-radius:10px; margin-bottom:15px;}
-button {padding:10px; margin:5px; border:none; border-radius:6px;}
-.black {background:black; color:white;}
-.gray {background:#ddd;}
-.input {width:100%; padding:8px; margin:5px 0;}
-.nameBtn {display:block; width:100%; padding:10px; margin:5px 0; border-radius:8px;}
-.done {background:black; color:white;}
+body{font-family:sans-serif;background:#f5f5f5;padding:15px;}
+.card{background:white;padding:15px;border-radius:10px;margin-bottom:15px;}
+button{padding:10px;margin:5px;border:none;border-radius:8px;font-size:14px;}
+.nameBtn{width:100%;}
+.done{background:black;color:white;}
+.pending{background:#ddd;}
+.selected{background:#4CAF50;color:white;}
+input{width:100%;padding:8px;margin:5px 0;}
 </style>
 </head>
 
@@ -22,94 +22,154 @@ button {padding:10px; margin:5px; border:none; border-radius:6px;}
 <h2>양주옥정회중 3집단 봉사기록</h2>
 
 <div class="card">
-<h3>월별 입력</h3>
-
-<input id="month" class="input" placeholder="예: 2026-03"/>
-
-<div id="members"></div>
-
-<button class="black" onclick="saveAll()">저장</button>
+<h3>월 선택</h3>
+<input id="month" placeholder="예: 2026-03">
 </div>
 
 <div class="card">
-<h3>집단보고</h3>
+<h3>월별 입력</h3>
+<div id="members"></div>
+<button onclick="save()">저장</button>
+</div>
+
+<div class="card">
+<h3>제출 현황</h3>
+<div id="status"></div>
+</div>
+
+<div class="card">
+<h3>집단 봉사보고</h3>
 <pre id="report"></pre>
-<button class="black" onclick="copyReport()">복사</button>
+<button onclick="copy()">복사</button>
 </div>
 
 <div class="card">
 <h3>백업 / 복원</h3>
-<button class="black" onclick="backup()">백업</button>
+<button onclick="backup()">백업</button>
 <input type="file" onchange="restore(event)">
 </div>
 
 <script>
 
-const memberList = [
+const pioneers = ["엄미자","김영윤","임혁","최수림","안영옥"];
+
+const members = [
 "엄미자","김영윤","임혁","최수림","안영옥",
 "강언용","이명희","안진호","고다롱","박명철",
 "김솔","김광태","김하윤","이동국","김금선","최성남"
 ];
 
-let data = JSON.parse(localStorage.getItem('service')||'{}');
+let db = JSON.parse(localStorage.getItem('db')||'{}');
+
+function getMonth(){
+  return document.getElementById('month').value || "default";
+}
 
 function render(){
-  const div = document.getElementById('members');
-  div.innerHTML = '';
+  const month = getMonth();
+  if(!db[month]) db[month]={};
 
-  memberList.forEach(name=>{
+  const box = document.getElementById('members');
+  box.innerHTML = '';
+
+  members.forEach(name=>{
+    const data = db[month][name]||{};
     const btn = document.createElement('button');
-    btn.innerText = name;
-    btn.className = 'nameBtn ' + (data[name] ? 'done':'gray');
+
+    let type = data.type || (pioneers.includes(name) ? '정규':'전도인');
+
+    btn.innerText = name + " ("+type+")";
+
+    btn.className = "nameBtn " + (data.done ? 'done':'pending');
+
     btn.onclick = ()=>{
-      const time = prompt(name+" 시간 입력");
-      const note = prompt(name+" 비고 입력","");
-      data[name] = {time,note};
+      if(type === "전도인"){
+        data.done = !data.done;
+        data.type = "전도인";
+      }else{
+        let t = prompt("시간",data.time||"");
+        if(t!==null){
+          data.time = t;
+          data.done = true;
+        }
+        if(confirm("보조로 변경?")){
+          data.type = "보조";
+        }else{
+          data.type = "정규";
+        }
+      }
+
+      db[month][name]=data;
       render();
     };
-    div.appendChild(btn);
+
+    box.appendChild(btn);
   });
 
+  makeStatus();
   makeReport();
 }
 
-function saveAll(){
-  localStorage.setItem('service', JSON.stringify(data));
-  alert('저장 완료');
+function save(){
+  localStorage.setItem('db',JSON.stringify(db));
+  alert("저장됨");
+}
+
+function makeStatus(){
+  const month = getMonth();
+  let total = members.length;
+  let done = 0;
+  let not = [];
+
+  members.forEach(n=>{
+    if(db[month][n]?.done) done++;
+    else not.push(n);
+  });
+
+  document.getElementById('status').innerText =
+  "제출: "+done+"/"+total+"\n미제출:\n"+not.join(", ");
 }
 
 function makeReport(){
-  let txt = '';
-  Object.keys(data).forEach(n=>{
-    const d = data[n];
-    txt += `${n} 시간:${d.time||'-'} 비고:${d.note||''}\n`;
+  const month = getMonth();
+  let txt = "";
+
+  members.forEach(n=>{
+    let d = db[month][n];
+    if(!d) return;
+
+    if(d.type==="전도인"){
+      if(d.done) txt+=`${n} 참여\n`;
+    }else{
+      txt+=`${n} ${d.type} ${d.time||0}\n`;
+    }
   });
+
   document.getElementById('report').innerText = txt;
 }
 
-function copyReport(){
+function copy(){
   navigator.clipboard.writeText(document.getElementById('report').innerText);
-  alert('복사 완료');
+  alert("복사 완료");
 }
 
 function backup(){
-  const blob = new Blob([JSON.stringify(data)],{type:'application/json'});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = 'backup.json';
+  const blob=new Blob([JSON.stringify(db)],{type:'application/json'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;
+  a.download='backup.json';
   a.click();
 }
 
 function restore(e){
-  const file = e.target.files[0];
-  const reader = new FileReader();
-  reader.onload = ()=>{
-    data = JSON.parse(reader.result);
-    localStorage.setItem('service', JSON.stringify(data));
+  const reader=new FileReader();
+  reader.onload=()=>{
+    db=JSON.parse(reader.result);
+    localStorage.setItem('db',JSON.stringify(db));
     render();
   };
-  reader.readAsText(file);
+  reader.readAsText(e.target.files[0]);
 }
 
 render();
