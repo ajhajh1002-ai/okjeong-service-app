@@ -351,7 +351,6 @@ function getPreviousMonthDefault(){
   return { year:d.getFullYear(), month:d.getMonth()+1 };
 }
 function getCurrentServiceYear(){
-  // 2025 봉사연도 = 2025-09 ~ 2026-08
   const y = currentYear();
   const m = currentMonth();
   return m >= 9 ? y : y - 1;
@@ -528,72 +527,13 @@ function buildPersonalText(){
     if(type === '전도인'){
       const p = rec.participate === 'O' ? '참여' : rec.participate === 'X' ? '미참여' : '-';
       lines.push(`${m}월 (${y}) ${type} ${p} 연구:${rec.study || '-'}${rec.note ? ' 비고:' + rec.note : ''}`);
-    }else if(type === '-' ){
+    }else if(type === '-'){
       lines.push(`${m}월 (${y}) -`);
     }else{
       lines.push(`${m}월 (${y}) ${type} 시간:${rec.time || '-'} 연구:${rec.study || '-'}${rec.note ? ' 비고:' + rec.note : ''}`);
     }
   });
   return lines.join('\n');
-}
-function normalizeType(v){
-  const t = String(v || '').trim();
-  if(['정규','정규P','정규파','정규파이오니아'].includes(t)) return '정규';
-  if(['보조','보조P','보조파','보조파이오니아'].includes(t)) return '보조';
-  return '전도인';
-}
-function bulkImport(){
-  const el = document.getElementById('bulk-input');
-  const raw = (el.value || '').trim();
-  if(!raw) return alert('붙여넣을 데이터가 없습니다.');
-
-  const lines = raw.split(/\r?\n/).map(s => s.trim()).filter(Boolean);
-  let count = 0;
-
-  lines.forEach((line, idx) => {
-    const cols = line.includes('\t') ? line.split('\t') : line.split(',');
-    if(cols.length < 8) return;
-
-    let [year, month, name, type, time, study, participate, note] =
-      cols.map(v => String(v ?? '').trim());
-
-    if(idx === 0 && !/^\d{4}$/.test(year)) return;
-    if(!year || !month || !name) return;
-
-    const ym = makeYm(Number(year), Number(month));
-    if(!store.records[ym]) store.records[ym] = {};
-    if(!store.auxByMonth[ym]) store.auxByMonth[ym] = [];
-
-    if(!store.members.includes(name)) {
-      store.members.push(name);
-    }
-
-    const normalizedType = normalizeType(type);
-    const rec = store.records[ym][name] || {};
-
-    rec.type = normalizedType;
-    rec.time = time || '';
-    rec.study = study || '';
-    rec.participate = participate || '';
-    rec.note = note || '';
-
-    store.records[ym][name] = rec;
-
-    if(normalizedType === '보조'){
-      if(!store.auxByMonth[ym].includes(name)) {
-        store.auxByMonth[ym].push(name);
-      }
-    } else {
-      store.auxByMonth[ym] = store.auxByMonth[ym].filter(x => x !== name);
-    }
-
-    count++;
-  });
-
-  saveStore();
-  render();
-  el.value = '';
-  toast(count + '건 일괄 입력 완료');
 }
 function downloadBackup(){
   const blob = new Blob([JSON.stringify(store, null, 2)], {type:'application/json'});
@@ -674,7 +614,6 @@ function toggleAux(name){
     if(rec){
       if(rec.type === '보조') rec.type = '전도인';
       rec.time = '';
-      rec.study = '';
     }
   }else{
     store.auxByMonth[ym] = [...list, name];
@@ -863,19 +802,6 @@ function renderMain(){
           <button class="btn-outline" onclick="openRestore()">복구(JSON)</button>
         </div>
         <input id="restore-file" type="file" accept="application/json" style="display:none" onchange="restoreBackup(event)" />
-      </div>
-
-      <div class="card">
-        <div class="title-row">
-          <div class="title"><span class="badge-icon">일</span>기존 데이터 일괄 입력</div>
-        </div>
-        <div class="helper" style="margin-bottom:10px">형식: 연,월,이름,구분,시간,연구,참여,비고</div>
-        <textarea id="bulk-input" placeholder="연,월,이름,구분,시간,연구,참여,비고
-2025,6,엄미자,정규,48,1,,
-2025,6,김영윤,정규,35,1,,
-2025,6,안진호,전도인,,1,O,
-2025,6,고다롱,전도인,,1,O,재방문 계속"></textarea>
-        <button class="btn-black" style="width:100%;margin-top:10px" onclick="bulkImport()">일괄 입력</button>
       </div>
 
       <div class="card">
