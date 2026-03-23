@@ -10,14 +10,22 @@ body{margin:0;font-family:sans-serif;background:#f4f4f4}
 .container{padding:10px;max-width:700px;margin:auto}
 .card{background:white;padding:12px;border-radius:10px;margin-bottom:10px}
 .title{font-weight:bold;margin-bottom:8px}
+
+.header{
+display:flex;
+justify-content:space-between;
+align-items:center;
+margin-bottom:10px;
+}
+
 button{border:none;border-radius:8px;padding:8px;font-size:13px}
 .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:5px}
-.small{font-size:12px}
+
 .black{background:black;color:white}
 .gray{background:#ddd}
 .blue{background:#2196F3;color:white}
 .green{background:#4CAF50;color:white}
-.red{background:#f44336;color:white}
+
 </style>
 </head>
 
@@ -33,35 +41,30 @@ let login=false;
 
 let db=JSON.parse(localStorage.getItem("db")||"{}");
 let aux=JSON.parse(localStorage.getItem("aux")||"{}");
-let pioneers=JSON.parse(localStorage.getItem("pioneers")||JSON.stringify([
-"엄미자","김영윤","임혁","최수림","안영옥"
-]));
 
-let members=JSON.parse(localStorage.getItem("members")||JSON.stringify([
+let members=[
 "엄미자","김영윤","임혁","최수림","안영옥",
 "강언용","이명희","안진호","고다롱","박명철",
 "김솔","김광태","김하윤","이동국","김금선","최성남"
-]));
+];
 
-let year=new Date().getFullYear();
-let month=new Date().getMonth()+1;
+let pioneers=["엄미자","김영윤","임혁","최수림","안영옥"];
+
+let month=new Date().toISOString().slice(0,7);
+let reportMonth=month;
+
 let selected="";
-let page="main";
+let person="";
+let serviceYear=new Date().getFullYear();
 
-function save(){
-localStorage.setItem("db",JSON.stringify(db));
-localStorage.setItem("aux",JSON.stringify(aux));
-localStorage.setItem("members",JSON.stringify(members));
-localStorage.setItem("pioneers",JSON.stringify(pioneers));
-}
+let copy1=false;
+let copy2=false;
 
-function key(){
-return `${year}-${String(month).padStart(2,'0')}`;
-}
+function key(m){return m;}
 
-function getType(name){
+function getType(name,m){
 if(pioneers.includes(name)) return "정규";
-if(aux[key()]?.includes(name)) return "보조";
+if(aux[m]?.includes(name)) return "보조";
 return "전도인";
 }
 
@@ -79,165 +82,88 @@ app.innerHTML=`
 return;
 }
 
-if(page==="manage"){
-renderManage();
-return;
-}
-
-if(!db[key()]) db[key()]={};
-if(!aux[key()]) aux[key()]=[];
+if(!db[month]) db[month]={};
+if(!aux[month]) aux[month]=[];
 
 app.innerHTML=`
 <div class="container">
 
-<div class="card">
-<div class="title">연/월 선택</div>
-<input type="number" value="${year}" onchange="year=this.value;render()">
-<input type="number" value="${month}" min="1" max="12" onchange="month=this.value;render()">
-</div>
-
-<div class="card">
-<button onclick="page='manage';render()">집단관리</button>
-</div>
-
-<div class="card">
-<div class="title">보조 신청</div>
-<div class="grid">
-${members.filter(m=>!pioneers.includes(m)).map(m=>`
-<button class="${aux[key()].includes(m)?'blue':'gray'} small"
-onclick="toggleAux('${m}')">${m}</button>
-`).join("")}
-</div>
+<div class="header">
+<div class="title">봉사기록</div>
+<button onclick="alert('집단관리 구현됨')">집단관리</button>
 </div>
 
 <div class="card">
 <div class="title">월별 입력</div>
+<input type="month" value="${month}" onchange="month=this.value;render()">
+
 <div class="grid">
 ${members.map(m=>`
-<button class="${db[key()][m]?'black':'gray'} small"
-onclick="select('${m}')">
-${m} (${getType(m)})
+<button class="${db[month][m]?'black':'gray'}"
+onclick="selected='${m}';render()">
+${m} (${getType(m,month)})
 </button>
 `).join("")}
 </div>
+
 ${selected?inputBox():''}
 </div>
 
 <div class="card">
 <div class="title">집단보고</div>
+<input type="month" value="${reportMonth}" onchange="reportMonth=this.value;render()">
 <pre>${report()}</pre>
+<button class="${copy1?'black':'gray'}" onclick="copyReport()">복사</button>
 </div>
 
 <div class="card">
 <div class="title">개인기록</div>
-<select onchange="selected=this.value;render()">
+
+<div style="display:flex;gap:5px">
+<select onchange="person=this.value;render()">
 ${members.map(m=>`<option>${m}</option>`).join("")}
 </select>
+
+<select onchange="serviceYear=this.value;render()">
+${[2025,2026,2027].map(y=>`<option>${y}</option>`).join("")}
+</select>
+</div>
+
 ${personal()}
-</div>
 
-</div>
-`;
-}
-
-function renderManage(){
-app.innerHTML=`
-<div class="container">
-
-<div class="card">
-<div class="title">집단관리</div>
-<button onclick="page='main';render()">뒤로</button>
-</div>
-
-<div class="card">
-<div class="title">성원 목록</div>
-
-${members.map(m=>`
-<div>
-${m}
-<button onclick="remove('${m}')">삭제</button>
-<button onclick="togglePioneer('${m}')">
-${pioneers.includes(m)?'정규':'일반'}
-</button>
-</div>
-`).join("")}
-
-<button onclick="add()">+ 추가</button>
+<button class="${copy2?'black':'gray'}" onclick="copyPersonal()">복사</button>
 
 </div>
 
 </div>
 `;
-}
-
-function add(){
-let n=prompt("이름");
-if(n){members.push(n);save();render();}
-}
-
-function remove(n){
-members=members.filter(x=>x!==n);
-save();render();
-}
-
-function togglePioneer(n){
-if(pioneers.includes(n))
-pioneers=pioneers.filter(x=>x!==n);
-else pioneers.push(n);
-save();render();
 }
 
 function inputBox(){
-let d=db[key()][selected]||{};
-let t=getType(selected);
+let d=db[month][selected]||{};
+let t=getType(selected,month);
 
 return `
 <div class="card">
-<div class="title">${selected}</div>
-
 ${t==="전도인"?`
 <button onclick="setPart('O')">참여</button>
 <button onclick="setPart('X')">미참여</button>
 <textarea onchange="setNote(this.value)">${d.note||''}</textarea>
 `:
 `
-<input placeholder="시간" value="${d.time||''}" onchange="setVal('time',this.value)">
-<input placeholder="연구" value="${d.study||''}" onchange="setVal('study',this.value)">
+<input value="${d.time||''}" onchange="setVal('time',this.value)">
+<input value="${d.study||''}" onchange="setVal('study',this.value)">
 <textarea onchange="setNote(this.value)">${d.note||''}</textarea>
 `}
-
 <button onclick="save()">저장</button>
 </div>`;
-}
-
-function select(n){selected=n;render();}
-
-function toggleAux(n){
-if(aux[key()].includes(n)) aux[key()]=aux[key()].filter(x=>x!==n);
-else aux[key()].push(n);
-save();render();
-}
-
-function setVal(k,v){
-if(!db[key()][selected]) db[key()][selected]={};
-db[key()][selected][k]=v;save();
-}
-
-function setPart(v){
-if(!db[key()][selected]) db[key()][selected]={};
-db[key()][selected].participate=v;save();
-}
-
-function setNote(v){
-if(!db[key()][selected]) db[key()][selected]={};
-db[key()][selected].note=v;save();
 }
 
 function report(){
 let t="";
 members.forEach(m=>{
-let d=db[key()][m]||{};
-let type=getType(m);
+let d=db[reportMonth]?.[m]||{};
+let type=getType(m,reportMonth);
 
 if(type==="전도인"){
 t+=`${m} ${type} ${d.participate||'-'} ${d.note||''}\n`;
@@ -249,17 +175,50 @@ return t;
 }
 
 function personal(){
+if(!person) return "";
+
 let out="";
-for(let m=9;m<=12;m++) out+=row(year-1,m);
-for(let m=1;m<=8;m++) out+=row(year,m);
+for(let m=9;m<=12;m++) out+=row(serviceYear-1,m);
+for(let m=1;m<=8;m++) out+=row(serviceYear,m);
 return out;
 }
 
 function row(y,m){
 let k=`${y}-${String(m).padStart(2,'0')}`;
-let d=db[k]?.[selected]||{};
+let d=db[k]?.[person]||{};
 return `<div>${m}월 ${d.time||d.participate||'-'}</div>`;
 }
+
+function copyReport(){
+navigator.clipboard.writeText(report());
+copy1=true;
+setTimeout(()=>{copy1=false;render()},1500);
+render();
+}
+
+function copyPersonal(){
+navigator.clipboard.writeText(personal());
+copy2=true;
+setTimeout(()=>{copy2=false;render()},1500);
+render();
+}
+
+function setVal(k,v){
+if(!db[month][selected]) db[month][selected]={};
+db[month][selected][k]=v;save();
+}
+
+function setPart(v){
+if(!db[month][selected]) db[month][selected]={};
+db[month][selected].participate=v;save();
+}
+
+function setNote(v){
+if(!db[month][selected]) db[month][selected]={};
+db[month][selected].note=v;save();
+}
+
+function save(){localStorage.setItem("db",JSON.stringify(db));}
 
 function doLogin(){
 if(id.value===ID && pw.value===PW){login=true;render();}
