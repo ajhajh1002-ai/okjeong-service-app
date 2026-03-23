@@ -312,7 +312,8 @@
 const APP_TITLE = '양주옥정회중 3집단 봉사기록';
 const LOGIN_ID = 'jw';
 const LOGIN_PW = '6104';
-const STORAGE_KEY = 'okjeong_service_final_v8';
+const STORAGE_KEY = 'okjeong_service_final_v9';
+
 const DEFAULT_MEMBERS = [
   '엄미자','김영윤','임혁','최수림','안영옥',
   '강언용','이명희','안진호','고다롱','박명철',
@@ -333,6 +334,9 @@ function esc(v){
     .replace(/"/g,'&quot;')
     .replace(/'/g,'&#39;');
 }
+function sq(v){
+  return String(v ?? '').replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+}
 function toast(msg){
   const el = document.getElementById('toast');
   el.textContent = msg;
@@ -347,6 +351,7 @@ function getPreviousMonthDefault(){
   return { year:d.getFullYear(), month:d.getMonth()+1 };
 }
 function getCurrentServiceYear(){
+  // 2025 봉사연도 = 2025-09 ~ 2026-08
   const y = currentYear();
   const m = currentMonth();
   return m >= 9 ? y : y - 1;
@@ -378,6 +383,7 @@ function loadStore(){
   };
 }
 let store = loadStore();
+
 const prevDefault = getPreviousMonthDefault();
 let ui = {
   isAuth: false,
@@ -392,6 +398,7 @@ let ui = {
   reportCopied: false,
   personalCopied: false
 };
+
 function saveStore(){
   localStorage.setItem(STORAGE_KEY, JSON.stringify(store));
   localStorage.setItem('db', JSON.stringify(store.records));
@@ -412,8 +419,10 @@ function ensureSelections(){
   if(!known.includes(ui.selectedPerson)) ui.selectedPerson = known[0] || '';
 }
 ensureSelections();
+
 function currentInputYm(){ return makeYm(Number(ui.inputYear), Number(ui.inputMonth)); }
 function currentReportYm(){ return makeYm(Number(ui.reportYear), Number(ui.reportMonth)); }
+
 function getMonthRecords(ym){
   if(!store.records[ym]) store.records[ym] = {};
   return store.records[ym];
@@ -423,6 +432,8 @@ function getAuxList(ym){
   return store.auxByMonth[ym];
 }
 function resolveType(name, ym){
+  const rec = (store.records[ym] || {})[name];
+  if(rec && rec.type) return rec.type;
   if(store.pioneers.includes(name)) return '정규';
   if(getAuxList(ym).includes(name)) return '보조';
   return '전도인';
@@ -430,8 +441,15 @@ function resolveType(name, ym){
 function ensureRecord(name, ym){
   const monthObj = getMonthRecords(ym);
   if(!monthObj[name]){
-    monthObj[name] = { time:'', study:'', participate:'', note:'' };
+    monthObj[name] = {
+      type: resolveType(name, ym),
+      time:'',
+      study:'',
+      participate:'',
+      note:''
+    };
   }
+  if(!monthObj[name].type) monthObj[name].type = resolveType(name, ym);
   return monthObj[name];
 }
 function isSubmitted(name, ym){
@@ -490,7 +508,7 @@ function buildGroupReportText(){
     const type = resolveType(name, ym);
     if(type === '전도인'){
       const p = rec.participate === 'O' ? '참여' : rec.participate === 'X' ? '미참여' : '-';
-      lines.push(`${name} ${type} ${p}${rec.note ? ' 비고:' + rec.note : ''}`);
+      lines.push(`${name} ${type} ${p} 연구:${rec.study || '-'}${rec.note ? ' 비고:' + rec.note : ''}`);
     }else{
       lines.push(`${name} ${type} 시간:${rec.time || '-'} 연구:${rec.study || '-'}${rec.note ? ' 비고:' + rec.note : ''}`);
     }
@@ -505,15 +523,77 @@ function buildPersonalText(){
     const y = m >= 9 ? sy : sy + 1;
     const ym = makeYm(y, m);
     const rec = (store.records[ym] || {})[name] || {};
-    const type = resolveType(name, ym);
+    const hasData = Object.keys(rec).length > 0;
+    const type = hasData ? (rec.type || resolveType(name, ym)) : '-';
     if(type === '전도인'){
       const p = rec.participate === 'O' ? '참여' : rec.participate === 'X' ? '미참여' : '-';
-      lines.push(`${m}월 (${y}) ${type} ${p}${rec.note ? ' 비고:' + rec.note : ''}`);
+      lines.push(`${m}월 (${y}) ${type} ${p} 연구:${rec.study || '-'}${rec.note ? ' 비고:' + rec.note : ''}`);
+    }else if(type === '-' ){
+      lines.push(`${m}월 (${y}) -`);
     }else{
       lines.push(`${m}월 (${y}) ${type} 시간:${rec.time || '-'} 연구:${rec.study || '-'}${rec.note ? ' 비고:' + rec.note : ''}`);
     }
   });
   return lines.join('\n');
+}
+function normalizeType(v){
+  const t = String(v || '').trim();
+  if(['정규','정규P','정규파','정규파이오니아'].includes(t)) return '정규';
+  if(['보조','보조P','보조파','보조파이오니아'].includes(t)) return '보조';
+  return '전도인';
+}
+function bulkImport(){
+  const el = document.getElementById('bulk-input');
+  const raw = (el.value || '').trim();
+  if(!raw) return alert('붙여넣을 데이터가 없습니다.');
+
+  const lines = raw.split(/\r?\n/).map(s => s.trim()).filter(Boolean);
+  let count = 0;
+
+  lines.forEach((line, idx) => {
+    const cols = line.includes('\t') ? line.split('\t') : line.split(',');
+    if(cols.length < 8) return;
+
+    let [year, month, name, type, time, study, participate, note] =
+      cols.map(v => String(v ?? '').trim());
+
+    if(idx === 0 && !/^\d{4}$/.test(year)) return;
+    if(!year || !month || !name) return;
+
+    const ym = makeYm(Number(year), Number(month));
+    if(!store.records[ym]) store.records[ym] = {};
+    if(!store.auxByMonth[ym]) store.auxByMonth[ym] = [];
+
+    if(!store.members.includes(name)) {
+      store.members.push(name);
+    }
+
+    const normalizedType = normalizeType(type);
+    const rec = store.records[ym][name] || {};
+
+    rec.type = normalizedType;
+    rec.time = time || '';
+    rec.study = study || '';
+    rec.participate = participate || '';
+    rec.note = note || '';
+
+    store.records[ym][name] = rec;
+
+    if(normalizedType === '보조'){
+      if(!store.auxByMonth[ym].includes(name)) {
+        store.auxByMonth[ym].push(name);
+      }
+    } else {
+      store.auxByMonth[ym] = store.auxByMonth[ym].filter(x => x !== name);
+    }
+
+    count++;
+  });
+
+  saveStore();
+  render();
+  el.value = '';
+  toast(count + '건 일괄 입력 완료');
 }
 function downloadBackup(){
   const blob = new Blob([JSON.stringify(store, null, 2)], {type:'application/json'});
@@ -554,6 +634,7 @@ function restoreBackup(evt){
   };
   reader.readAsText(file);
 }
+
 function login(){
   const id = document.getElementById('login-id').value.trim();
   const pw = document.getElementById('login-pw').value.trim();
@@ -582,6 +663,7 @@ function setInputYear(v){ ui.inputYear = Number(v); render(); }
 function setInputMonth(v){ ui.inputMonth = Number(v); render(); }
 function setReportYear(v){ ui.reportYear = Number(v); render(); }
 function setReportMonth(v){ ui.reportMonth = Number(v); render(); }
+
 function toggleAux(name){
   const ym = currentInputYm();
   if(store.pioneers.includes(name)) return;
@@ -589,10 +671,15 @@ function toggleAux(name){
   if(list.includes(name)){
     store.auxByMonth[ym] = list.filter(x=>x!==name);
     const rec = (store.records[ym] || {})[name];
-    if(rec){ rec.time = ''; rec.study = ''; }
+    if(rec){
+      if(rec.type === '보조') rec.type = '전도인';
+      rec.time = '';
+      rec.study = '';
+    }
   }else{
     store.auxByMonth[ym] = [...list, name];
     const rec = ensureRecord(name, ym);
+    rec.type = '보조';
     rec.participate = '';
   }
   saveStore();
@@ -604,12 +691,14 @@ function openMember(name){
 }
 function setParticipation(v){
   const rec = ensureRecord(ui.activeName, currentInputYm());
+  rec.type = '전도인';
   rec.participate = v;
   saveStore();
   render();
 }
 function setField(field, value){
   const rec = ensureRecord(ui.activeName, currentInputYm());
+  rec.type = resolveType(ui.activeName, currentInputYm());
   rec[field] = value;
   saveStore();
 }
@@ -694,10 +783,10 @@ function renderManage(){
               <div class="helper">기존 기록은 유지됩니다.</div>
             </div>
             <div class="row-auto">
-              <button class="${store.pioneers.includes(name)?'btn-black':'btn-gray'} mini" onclick="togglePioneer('${esc(name)}')">
+              <button class="${store.pioneers.includes(name)?'btn-black':'btn-gray'} mini" onclick="togglePioneer('${sq(name)}')">
                 ${store.pioneers.includes(name)?'정규':'일반'}
               </button>
-              <button class="btn-red mini" onclick="removeMember('${esc(name)}')">제거</button>
+              <button class="btn-red mini" onclick="removeMember('${sq(name)}')">제거</button>
             </div>
           </div>
         `).join('') || `<div class="empty">현재 성원이 없습니다.</div>`}
@@ -723,10 +812,11 @@ function renderMain(){
     const y = m >= 9 ? sy : sy + 1;
     const ym = makeYm(y, m);
     const rec = (store.records[ym] || {})[ui.selectedPerson] || {};
-    const type = resolveType(ui.selectedPerson, ym);
+    const hasData = Object.keys(rec).length > 0;
+    const type = hasData ? (rec.type || resolveType(ui.selectedPerson, ym)) : '-';
     const detail = type === '전도인'
-      ? ((rec.participate === 'O' ? '참여' : rec.participate === 'X' ? '미참여' : '-') + (rec.note ? ' / 비고: ' + rec.note : ''))
-      : (`시간 ${rec.time || '-'} / 연구 ${rec.study || '-'}${rec.note ? ' / 비고: ' + rec.note : ''}`);
+      ? ((rec.participate === 'O' ? '참여' : rec.participate === 'X' ? '미참여' : '-') + ` / 연구 ${rec.study || '-'}${rec.note ? ' / 비고: ' + rec.note : ''}`)
+      : (type === '-' ? '-' : `시간 ${rec.time || '-'} / 연구 ${rec.study || '-'}${rec.note ? ' / 비고: ' + rec.note : ''}`);
     return `
       <div class="record-line">
         <div class="record-left">
@@ -777,6 +867,19 @@ function renderMain(){
 
       <div class="card">
         <div class="title-row">
+          <div class="title"><span class="badge-icon">일</span>기존 데이터 일괄 입력</div>
+        </div>
+        <div class="helper" style="margin-bottom:10px">형식: 연,월,이름,구분,시간,연구,참여,비고</div>
+        <textarea id="bulk-input" placeholder="연,월,이름,구분,시간,연구,참여,비고
+2025,6,엄미자,정규,48,1,,
+2025,6,김영윤,정규,35,1,,
+2025,6,안진호,전도인,,1,O,
+2025,6,고다롱,전도인,,1,O,재방문 계속"></textarea>
+        <button class="btn-black" style="width:100%;margin-top:10px" onclick="bulkImport()">일괄 입력</button>
+      </div>
+
+      <div class="card">
+        <div class="title-row">
           <div class="title"><span class="badge-icon">입</span>월별 입력</div>
           <div class="sub">${inputYm}</div>
         </div>
@@ -810,7 +913,7 @@ function renderMain(){
         </div>
         <div class="row-auto" style="margin-bottom:12px">
           ${store.members.filter(n=>!store.pioneers.includes(n)).map(name=>`
-            <button class="${auxList.includes(name)?'btn-purple':'btn-gray'} mini" onclick="toggleAux('${esc(name)}')">${esc(name)}</button>
+            <button class="${auxList.includes(name)?'btn-purple':'btn-gray'} mini" onclick="toggleAux('${sq(name)}')">${esc(name)}</button>
           `).join('') || `<div class="empty" style="width:100%">보조 신청 대상 성원이 없습니다.</div>`}
         </div>
 
@@ -819,7 +922,7 @@ function renderMain(){
             const submitted = isSubmitted(name, inputYm);
             const type = resolveType(name, inputYm);
             return `
-              <button class="member-btn ${submitted?'btn-green':'btn-red'}" onclick="openMember('${esc(name)}')">
+              <button class="member-btn ${submitted?'btn-green':'btn-red'}" onclick="openMember('${sq(name)}')">
                 <span class="member-main">
                   <span class="member-name">${esc(name)}</span>
                   <span class="member-role">(${type})</span>
@@ -845,6 +948,8 @@ function renderMain(){
                 <button class="${activeRec.participate==='O'?'btn-black':'btn-outline'}" onclick="setParticipation('O')">참여</button>
                 <button class="${activeRec.participate==='X'?'btn-black':'btn-outline'}" onclick="setParticipation('X')">미참여</button>
               </div>
+              <div style="height:8px"></div>
+              <input placeholder="연구" value="${esc(activeRec.study || '')}" oninput="setField('study', this.value)" />
               <div style="height:8px"></div>
               <textarea placeholder="비고" oninput="setField('note', this.value)">${esc(activeRec.note || '')}</textarea>
             ` : `
@@ -899,7 +1004,7 @@ function renderMain(){
             const type = resolveType(name, reportYm);
             if(type === '전도인'){
               const p = rec.participate === 'O' ? '참여' : rec.participate === 'X' ? '미참여' : '-';
-              return `<div class="line-item"><strong>${esc(name)}</strong> · ${type} · ${p}${rec.note ? ' · 비고: ' + esc(rec.note) : ''}</div>`;
+              return `<div class="line-item"><strong>${esc(name)}</strong> · ${type} · ${p} · 연구 ${esc(rec.study || '-')} ${rec.note ? '· 비고: ' + esc(rec.note) : ''}</div>`;
             }
             return `<div class="line-item"><strong>${esc(name)}</strong> · ${type} · 시간 ${esc(rec.time || '-')} · 연구 ${esc(rec.study || '-')} ${rec.note ? '· 비고: ' + esc(rec.note) : ''}</div>`;
           }).join('') || `<div class="empty">해당 월 보고 데이터가 없습니다.</div>`}
