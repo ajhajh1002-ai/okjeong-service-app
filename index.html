@@ -6,170 +6,240 @@
 <title>양주옥정회중 3집단 봉사기록</title>
 
 <style>
-body{font-family:sans-serif;background:#f5f5f5;padding:15px;}
-.card{background:white;padding:15px;border-radius:10px;margin-bottom:15px;}
-button{padding:10px;margin:5px;border:none;border-radius:8px;font-size:14px;}
-.nameBtn{width:100%;}
-.done{background:black;color:white;}
-.pending{background:#ddd;}
-.selected{background:#4CAF50;color:white;}
-input{width:100%;padding:8px;margin:5px 0;}
+body{font-family:sans-serif;margin:0;background:#f4f4f4}
+.container{padding:12px}
+.card{background:white;border-radius:12px;padding:12px;margin-bottom:12px}
+button{border:none;border-radius:10px;padding:12px;width:100%;margin:5px 0;font-size:15px}
+.primary{background:black;color:white}
+.gray{background:#ddd}
+.done{background:#000;color:#fff}
+.flex{display:flex;gap:6px}
+.flex button{flex:1}
+h3{margin:5px 0 10px}
+input{width:100%;padding:10px;margin:5px 0;border-radius:8px;border:1px solid #ccc}
+.small{font-size:13px;color:#666}
 </style>
 </head>
 
 <body>
 
-<h2>양주옥정회중 3집단 봉사기록</h2>
+<div id="app"></div>
+
+<script>
+
+const ID="okjeong";
+const PW="6104";
+
+let db=JSON.parse(localStorage.getItem("db")||"{}");
+let members=JSON.parse(localStorage.getItem("members")||JSON.stringify([
+"엄미자","김영윤","임혁","최수림","안영옥",
+"강언용","이명희","안진호","고다롱","박명철",
+"김솔","김광태","김하윤","이동국","김금선","최성남"
+]));
+let pioneers=JSON.parse(localStorage.getItem("pioneers")||JSON.stringify([
+"엄미자","김영윤","임혁","최수림","안영옥"
+]));
+
+let page="login";
+let month=new Date().toISOString().slice(0,7);
+
+function saveAll(){
+localStorage.setItem("db",JSON.stringify(db));
+localStorage.setItem("members",JSON.stringify(members));
+localStorage.setItem("pioneers",JSON.stringify(pioneers));
+}
+
+function render(){
+
+const app=document.getElementById("app");
+
+if(page==="login"){
+app.innerHTML=`
+<div class="container">
+<div class="card">
+<h3>로그인</h3>
+<input id="id" placeholder="아이디">
+<input id="pw" type="password" placeholder="비밀번호">
+<button class="primary" onclick="login()">로그인</button>
+</div>
+</div>`;
+return;
+}
+
+if(page==="manage"){
+app.innerHTML=`
+<div class="container">
+<div class="card">
+<h3>집단관리</h3>
+${members.map(m=>`
+<div class="flex">
+<input value="${m}" onchange="editName('${m}',this.value)">
+<button onclick="removeMember('${m}')">삭제</button>
+<button onclick="togglePioneer('${m}')">${pioneers.includes(m)?"정규":"일반"}</button>
+</div>`).join("")}
+<button onclick="addMember()">+ 추가</button>
+<button onclick="back()">뒤로</button>
+</div>
+</div>`;
+return;
+}
+
+let data=db[month]||{};
+db[month]=data;
+
+app.innerHTML=`
+<div class="container">
 
 <div class="card">
-<h3>월 선택</h3>
-<input id="month" placeholder="예: 2026-03">
+<input value="${month}" onchange="setMonth(this.value)">
+<div class="small">제출률 ${calcRate()}%</div>
 </div>
 
 <div class="card">
 <h3>월별 입력</h3>
-<div id="members"></div>
-<button onclick="save()">저장</button>
+${members.map(m=>{
+let d=data[m]||{};
+let type=d.type||(pioneers.includes(m)?"정규":"전도인");
+let done=d.done;
+
+return `<button class="${done?'done':'gray'}" onclick="input('${m}')">
+${m} (${type})
+</button>`;
+}).join("")}
 </div>
 
 <div class="card">
-<h3>제출 현황</h3>
-<div id="status"></div>
-</div>
-
-<div class="card">
-<h3>집단 봉사보고</h3>
-<pre id="report"></pre>
+<h3>집단보고</h3>
+<pre>${makeReport()}</pre>
 <button onclick="copy()">복사</button>
 </div>
 
 <div class="card">
-<h3>백업 / 복원</h3>
+<h3>미제출</h3>
+${getNot().join(", ")}
+</div>
+
+<div class="card">
 <button onclick="backup()">백업</button>
 <input type="file" onchange="restore(event)">
 </div>
 
-<script>
+<div class="card">
+<button onclick="goManage()">집단관리</button>
+</div>
 
-const pioneers = ["엄미자","김영윤","임혁","최수림","안영옥"];
-
-const members = [
-"엄미자","김영윤","임혁","최수림","안영옥",
-"강언용","이명희","안진호","고다롱","박명철",
-"김솔","김광태","김하윤","이동국","김금선","최성남"
-];
-
-let db = JSON.parse(localStorage.getItem('db')||'{}');
-
-function getMonth(){
-  return document.getElementById('month').value || "default";
+</div>`;
 }
 
-function render(){
-  const month = getMonth();
-  if(!db[month]) db[month]={};
-
-  const box = document.getElementById('members');
-  box.innerHTML = '';
-
-  members.forEach(name=>{
-    const data = db[month][name]||{};
-    const btn = document.createElement('button');
-
-    let type = data.type || (pioneers.includes(name) ? '정규':'전도인');
-
-    btn.innerText = name + " ("+type+")";
-
-    btn.className = "nameBtn " + (data.done ? 'done':'pending');
-
-    btn.onclick = ()=>{
-      if(type === "전도인"){
-        data.done = !data.done;
-        data.type = "전도인";
-      }else{
-        let t = prompt("시간",data.time||"");
-        if(t!==null){
-          data.time = t;
-          data.done = true;
-        }
-        if(confirm("보조로 변경?")){
-          data.type = "보조";
-        }else{
-          data.type = "정규";
-        }
-      }
-
-      db[month][name]=data;
-      render();
-    };
-
-    box.appendChild(btn);
-  });
-
-  makeStatus();
-  makeReport();
+function login(){
+if(id.value===ID && pw.value===PW){
+page="main";
+render();
+}else alert("로그인 실패");
 }
 
-function save(){
-  localStorage.setItem('db',JSON.stringify(db));
-  alert("저장됨");
+function input(name){
+let d=db[month][name]||{};
+let type=d.type||(pioneers.includes(name)?"정규":"전도인");
+
+if(type==="전도인"){
+d.done=!d.done;
+d.type="전도인";
+}else{
+let t=prompt("시간",d.time||"");
+if(t!==null){
+d.time=t;
+d.done=true;
+}
+if(confirm("보조로 변경?")) d.type="보조";
+else d.type="정규";
 }
 
-function makeStatus(){
-  const month = getMonth();
-  let total = members.length;
-  let done = 0;
-  let not = [];
-
-  members.forEach(n=>{
-    if(db[month][n]?.done) done++;
-    else not.push(n);
-  });
-
-  document.getElementById('status').innerText =
-  "제출: "+done+"/"+total+"\n미제출:\n"+not.join(", ");
+db[month][name]=d;
+saveAll();
+render();
 }
 
 function makeReport(){
-  const month = getMonth();
-  let txt = "";
+let txt="";
+members.forEach(m=>{
+let d=db[month][m];
+if(!d) return;
 
-  members.forEach(n=>{
-    let d = db[month][n];
-    if(!d) return;
-
-    if(d.type==="전도인"){
-      if(d.done) txt+=`${n} 참여\n`;
-    }else{
-      txt+=`${n} ${d.type} ${d.time||0}\n`;
-    }
-  });
-
-  document.getElementById('report').innerText = txt;
+if(d.type==="전도인"){
+if(d.done) txt+=`${m} 참여\n`;
+}else{
+txt+=`${m} ${d.type} ${d.time||0}\n`;
+}
+});
+return txt;
 }
 
 function copy(){
-  navigator.clipboard.writeText(document.getElementById('report').innerText);
-  alert("복사 완료");
+navigator.clipboard.writeText(makeReport());
+alert("복사됨");
+}
+
+function calcRate(){
+let total=members.length;
+let done=members.filter(m=>db[month][m]?.done).length;
+return Math.floor(done/total*100);
+}
+
+function getNot(){
+return members.filter(m=>!db[month][m]?.done);
+}
+
+function setMonth(m){
+month=m;
+render();
 }
 
 function backup(){
-  const blob=new Blob([JSON.stringify(db)],{type:'application/json'});
-  const url=URL.createObjectURL(blob);
-  const a=document.createElement('a');
-  a.href=url;
-  a.download='backup.json';
-  a.click();
+const blob=new Blob([JSON.stringify({db,members,pioneers})],{type:'application/json'});
+const url=URL.createObjectURL(blob);
+const a=document.createElement('a');
+a.href=url;
+a.download='backup.json';
+a.click();
 }
 
 function restore(e){
-  const reader=new FileReader();
-  reader.onload=()=>{
-    db=JSON.parse(reader.result);
-    localStorage.setItem('db',JSON.stringify(db));
-    render();
-  };
-  reader.readAsText(e.target.files[0]);
+const r=new FileReader();
+r.onload=()=>{
+let x=JSON.parse(r.result);
+db=x.db||{};
+members=x.members||members;
+pioneers=x.pioneers||pioneers;
+saveAll();
+render();
+};
+r.readAsText(e.target.files[0]);
+}
+
+function goManage(){page="manage";render();}
+function back(){page="main";render();}
+
+function addMember(){
+let n=prompt("이름");
+if(n){members.push(n);saveAll();render();}
+}
+
+function removeMember(n){
+members=members.filter(x=>x!==n);
+saveAll();render();
+}
+
+function editName(oldName,newName){
+members=members.map(x=>x===oldName?newName:x);
+saveAll();
+}
+
+function togglePioneer(n){
+if(pioneers.includes(n)){
+pioneers=pioneers.filter(x=>x!==n);
+}else pioneers.push(n);
+saveAll();render();
 }
 
 render();
