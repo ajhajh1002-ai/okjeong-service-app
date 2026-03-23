@@ -11,15 +11,16 @@ body{margin:0;font-family:sans-serif;background:#f4f4f4}
 .card{background:white;padding:12px;border-radius:10px;margin-bottom:10px}
 .title{font-weight:bold;margin-bottom:8px}
 button{border:none;border-radius:8px;padding:8px;font-size:13px}
-.small{font-size:12px}
 .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:5px}
+.small{font-size:12px}
 .black{background:black;color:white}
 .gray{background:#ddd}
 .blue{background:#2196F3;color:white}
 .green{background:#4CAF50;color:white}
+.red{background:#f44336;color:white}
 </style>
-
 </head>
+
 <body>
 <div id="app"></div>
 
@@ -32,23 +33,26 @@ let login=false;
 
 let db=JSON.parse(localStorage.getItem("db")||"{}");
 let aux=JSON.parse(localStorage.getItem("aux")||"{}");
+let pioneers=JSON.parse(localStorage.getItem("pioneers")||JSON.stringify([
+"엄미자","김영윤","임혁","최수림","안영옥"
+]));
 
-let members=[
+let members=JSON.parse(localStorage.getItem("members")||JSON.stringify([
 "엄미자","김영윤","임혁","최수림","안영옥",
 "강언용","이명희","안진호","고다롱","박명철",
 "김솔","김광태","김하윤","이동국","김금선","최성남"
-];
-
-let pioneers=["엄미자","김영윤","임혁","최수림","안영옥"];
+]));
 
 let year=new Date().getFullYear();
 let month=new Date().getMonth()+1;
-
 let selected="";
+let page="main";
 
 function save(){
 localStorage.setItem("db",JSON.stringify(db));
 localStorage.setItem("aux",JSON.stringify(aux));
+localStorage.setItem("members",JSON.stringify(members));
+localStorage.setItem("pioneers",JSON.stringify(pioneers));
 }
 
 function key(){
@@ -59,13 +63,6 @@ function getType(name){
 if(pioneers.includes(name)) return "정규";
 if(aux[key()]?.includes(name)) return "보조";
 return "전도인";
-}
-
-function isDone(name){
-let d=db[key()]?.[name]||{};
-let t=getType(name);
-if(t==="전도인") return d.participate;
-return d.time;
 }
 
 function render(){
@@ -82,6 +79,11 @@ app.innerHTML=`
 return;
 }
 
+if(page==="manage"){
+renderManage();
+return;
+}
+
 if(!db[key()]) db[key()]={};
 if(!aux[key()]) aux[key()]=[];
 
@@ -92,6 +94,10 @@ app.innerHTML=`
 <div class="title">연/월 선택</div>
 <input type="number" value="${year}" onchange="year=this.value;render()">
 <input type="number" value="${month}" min="1" max="12" onchange="month=this.value;render()">
+</div>
+
+<div class="card">
+<button onclick="page='manage';render()">집단관리</button>
 </div>
 
 <div class="card">
@@ -108,7 +114,7 @@ onclick="toggleAux('${m}')">${m}</button>
 <div class="title">월별 입력</div>
 <div class="grid">
 ${members.map(m=>`
-<button class="${isDone(m)?'black':'gray'} small"
+<button class="${db[key()][m]?'black':'gray'} small"
 onclick="select('${m}')">
 ${m} (${getType(m)})
 </button>
@@ -120,7 +126,6 @@ ${selected?inputBox():''}
 <div class="card">
 <div class="title">집단보고</div>
 <pre>${report()}</pre>
-<button onclick="copy()">복사</button>
 </div>
 
 <div class="card">
@@ -131,14 +136,55 @@ ${members.map(m=>`<option>${m}</option>`).join("")}
 ${personal()}
 </div>
 
+</div>
+`;
+}
+
+function renderManage(){
+app.innerHTML=`
+<div class="container">
+
 <div class="card">
-<button onclick="backup()">백업</button>
-<button onclick="restoreBtn()">복구</button>
-<input id="file" type="file" style="display:none" onchange="restore(event)">
+<div class="title">집단관리</div>
+<button onclick="page='main';render()">뒤로</button>
+</div>
+
+<div class="card">
+<div class="title">성원 목록</div>
+
+${members.map(m=>`
+<div>
+${m}
+<button onclick="remove('${m}')">삭제</button>
+<button onclick="togglePioneer('${m}')">
+${pioneers.includes(m)?'정규':'일반'}
+</button>
+</div>
+`).join("")}
+
+<button onclick="add()">+ 추가</button>
+
 </div>
 
 </div>
 `;
+}
+
+function add(){
+let n=prompt("이름");
+if(n){members.push(n);save();render();}
+}
+
+function remove(n){
+members=members.filter(x=>x!==n);
+save();render();
+}
+
+function togglePioneer(n){
+if(pioneers.includes(n))
+pioneers=pioneers.filter(x=>x!==n);
+else pioneers.push(n);
+save();render();
 }
 
 function inputBox(){
@@ -159,6 +205,7 @@ ${t==="전도인"?`
 <input placeholder="연구" value="${d.study||''}" onchange="setVal('study',this.value)">
 <textarea onchange="setNote(this.value)">${d.note||''}</textarea>
 `}
+
 <button onclick="save()">저장</button>
 </div>`;
 }
@@ -201,15 +248,10 @@ t+=`${m} ${type} ${d.time||'-'} ${d.study||'-'} ${d.note||''}\n`;
 return t;
 }
 
-function copy(){
-navigator.clipboard.writeText(report());
-}
-
 function personal(){
 let out="";
-let y=year;
-for(let m=9;m<=12;m++) out+=row(y-1,m);
-for(let m=1;m<=8;m++) out+=row(y,m);
+for(let m=9;m<=12;m++) out+=row(year-1,m);
+for(let m=1;m<=8;m++) out+=row(year,m);
 return out;
 }
 
@@ -217,24 +259,6 @@ function row(y,m){
 let k=`${y}-${String(m).padStart(2,'0')}`;
 let d=db[k]?.[selected]||{};
 return `<div>${m}월 ${d.time||d.participate||'-'}</div>`;
-}
-
-function backup(){
-let blob=new Blob([JSON.stringify(db)],{type:'application/json'});
-let a=document.createElement('a');
-a.href=URL.createObjectURL(blob);
-a.download="backup.json";
-a.click();
-}
-
-function restoreBtn(){
-document.getElementById("file").click();
-}
-
-function restore(e){
-let r=new FileReader();
-r.onload=()=>{db=JSON.parse(r.result);save();render();}
-r.readAsText(e.target.files[0]);
 }
 
 function doLogin(){
