@@ -3,30 +3,23 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>양주옥정회중 3집단 봉사기록</title>
+<title>봉사기록</title>
 
 <style>
 body{margin:0;font-family:sans-serif;background:#f4f4f4}
-.container{padding:12px;max-width:700px;margin:auto}
-
-.card{background:white;border-radius:12px;padding:12px;margin-bottom:10px}
+.container{padding:10px;max-width:700px;margin:auto}
+.card{background:white;padding:12px;border-radius:10px;margin-bottom:10px}
 .title{font-weight:bold;margin-bottom:8px}
-
-button{border:none;border-radius:10px;padding:10px;font-size:14px}
-.small-btn{padding:8px;font-size:12px}
-
+button{border:none;border-radius:8px;padding:8px;font-size:13px}
+.small{font-size:12px}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:5px}
 .black{background:black;color:white}
 .gray{background:#ddd}
-.green{background:#4CAF50;color:white}
-.red{background:#f44336;color:white}
 .blue{background:#2196F3;color:white}
-
-.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:6px}
-.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
-
+.green{background:#4CAF50;color:white}
 </style>
-</head>
 
+</head>
 <body>
 <div id="app"></div>
 
@@ -35,7 +28,10 @@ button{border:none;border-radius:10px;padding:10px;font-size:14px}
 const ID="okjeong";
 const PW="6104";
 
+let login=false;
+
 let db=JSON.parse(localStorage.getItem("db")||"{}");
+let aux=JSON.parse(localStorage.getItem("aux")||"{}");
 
 let members=[
 "엄미자","김영윤","임혁","최수림","안영옥",
@@ -44,24 +40,29 @@ let members=[
 ];
 
 let pioneers=["엄미자","김영윤","임혁","최수림","안영옥"];
-let aux={}; // 월별 보조신청
 
-let login=false;
-let month=new Date().toISOString().slice(0,7);
+let year=new Date().getFullYear();
+let month=new Date().getMonth()+1;
+
 let selected="";
-let copy1=false;
-let copy2=false;
 
-function save(){localStorage.setItem("db",JSON.stringify(db));}
+function save(){
+localStorage.setItem("db",JSON.stringify(db));
+localStorage.setItem("aux",JSON.stringify(aux));
+}
+
+function key(){
+return `${year}-${String(month).padStart(2,'0')}`;
+}
 
 function getType(name){
 if(pioneers.includes(name)) return "정규";
-if(aux[month]?.includes(name)) return "보조";
+if(aux[key()]?.includes(name)) return "보조";
 return "전도인";
 }
 
 function isDone(name){
-let d=db[month]?.[name]||{};
+let d=db[key()]?.[name]||{};
 let t=getType(name);
 if(t==="전도인") return d.participate;
 return d.time;
@@ -74,134 +75,148 @@ app.innerHTML=`
 <div class="container">
 <div class="card">
 <div class="title">로그인</div>
-<input id="id" placeholder="아이디"><br><br>
-<input id="pw" type="password" placeholder="비밀번호"><br><br>
-<button class="black" onclick="doLogin()">로그인</button>
-</div>
-</div>`;
+<input id="id"><br><br>
+<input id="pw" type="password"><br><br>
+<button onclick="doLogin()">로그인</button>
+</div></div>`;
 return;
 }
 
-if(!db[month]) db[month]={};
-if(!aux[month]) aux[month]=[];
+if(!db[key()]) db[key()]={};
+if(!aux[key()]) aux[key()]=[];
 
 app.innerHTML=`
 <div class="container">
 
 <div class="card">
-<div class="title">월 선택</div>
-<input type="month" value="${month}" onchange="month=this.value;render()">
+<div class="title">연/월 선택</div>
+<input type="number" value="${year}" onchange="year=this.value;render()">
+<input type="number" value="${month}" min="1" max="12" onchange="month=this.value;render()">
 </div>
 
 <div class="card">
-<div class="title">이달의 보조P</div>
+<div class="title">보조 신청</div>
 <div class="grid">
 ${members.filter(m=>!pioneers.includes(m)).map(m=>`
-<button class="${aux[month].includes(m)?'blue':'gray'} small-btn"
+<button class="${aux[key()].includes(m)?'blue':'gray'} small"
 onclick="toggleAux('${m}')">${m}</button>
 `).join("")}
 </div>
 </div>
 
 <div class="card">
-<div class="title">월별입력</div>
+<div class="title">월별 입력</div>
 <div class="grid">
 ${members.map(m=>`
-<button class="${isDone(m)?'black':'gray'} small-btn"
+<button class="${isDone(m)?'black':'gray'} small"
 onclick="select('${m}')">
-${m}
+${m} (${getType(m)})
 </button>
 `).join("")}
 </div>
-
-${selected?drawInput():''}
-
+${selected?inputBox():''}
 </div>
 
 <div class="card">
 <div class="title">집단보고</div>
 <pre>${report()}</pre>
-<button class="${copy1?'black':'gray'}" onclick="copyReport()">복사</button>
+<button onclick="copy()">복사</button>
 </div>
 
 <div class="card">
-<div class="title">백업 / 복원</div>
+<div class="title">개인기록</div>
+<select onchange="selected=this.value;render()">
+${members.map(m=>`<option>${m}</option>`).join("")}
+</select>
+${personal()}
+</div>
+
+<div class="card">
 <button onclick="backup()">백업</button>
-<input type="file" onchange="restore(event)">
+<button onclick="restoreBtn()">복구</button>
+<input id="file" type="file" style="display:none" onchange="restore(event)">
 </div>
 
 </div>
 `;
 }
 
-function drawInput(){
+function inputBox(){
+let d=db[key()][selected]||{};
 let t=getType(selected);
-let d=db[month][selected]||{};
+
 return `
 <div class="card">
-<div class="title">${selected} (${t})</div>
+<div class="title">${selected}</div>
 
 ${t==="전도인"?`
-<button onclick="setPart('${selected}','O')">참여</button>
-<button onclick="setPart('${selected}','X')">미참여</button>
-<textarea placeholder="비고" onchange="setNote('${selected}',this.value)">${d.note||''}</textarea>
+<button onclick="setPart('O')">참여</button>
+<button onclick="setPart('X')">미참여</button>
+<textarea onchange="setNote(this.value)">${d.note||''}</textarea>
 `:
 `
-<input placeholder="시간" value="${d.time||''}" onchange="setVal('${selected}','time',this.value)">
-<input placeholder="연구" value="${d.study||''}" onchange="setVal('${selected}','study',this.value)">
-<textarea placeholder="비고" onchange="setNote('${selected}',this.value)">${d.note||''}</textarea>
+<input placeholder="시간" value="${d.time||''}" onchange="setVal('time',this.value)">
+<input placeholder="연구" value="${d.study||''}" onchange="setVal('study',this.value)">
+<textarea onchange="setNote(this.value)">${d.note||''}</textarea>
 `}
-
-<button class="black" onclick="save()">저장</button>
+<button onclick="save()">저장</button>
 </div>`;
 }
 
 function select(n){selected=n;render();}
 
 function toggleAux(n){
-if(aux[month].includes(n)) aux[month]=aux[month].filter(x=>x!==n);
-else aux[month].push(n);
-render();
+if(aux[key()].includes(n)) aux[key()]=aux[key()].filter(x=>x!==n);
+else aux[key()].push(n);
+save();render();
 }
 
-function setVal(n,k,v){
-if(!db[month][n]) db[month][n]={};
-db[month][n][k]=v;
-save();
+function setVal(k,v){
+if(!db[key()][selected]) db[key()][selected]={};
+db[key()][selected][k]=v;save();
 }
 
-function setPart(n,v){
-if(!db[month][n]) db[month][n]={};
-db[month][n].participate=v;
-save();
+function setPart(v){
+if(!db[key()][selected]) db[key()][selected]={};
+db[key()][selected].participate=v;save();
 }
 
-function setNote(n,v){
-if(!db[month][n]) db[month][n]={};
-db[month][n].note=v;
-save();
+function setNote(v){
+if(!db[key()][selected]) db[key()][selected]={};
+db[key()][selected].note=v;save();
 }
 
 function report(){
-let txt="";
+let t="";
 members.forEach(m=>{
-let d=db[month][m]||{};
-let t=getType(m);
+let d=db[key()][m]||{};
+let type=getType(m);
 
-if(t==="전도인"){
-txt+=`${m} ${t} ${d.participate||'-'} ${d.note||''}\n`;
+if(type==="전도인"){
+t+=`${m} ${type} ${d.participate||'-'} ${d.note||''}\n`;
 }else{
-txt+=`${m} ${t} ${d.time||'-'} ${d.study||'-'} ${d.note||''}\n`;
+t+=`${m} ${type} ${d.time||'-'} ${d.study||'-'} ${d.note||''}\n`;
 }
 });
-return txt;
+return t;
 }
 
-function copyReport(){
+function copy(){
 navigator.clipboard.writeText(report());
-copy1=true;
-setTimeout(()=>{copy1=false;render()},1500);
-render();
+}
+
+function personal(){
+let out="";
+let y=year;
+for(let m=9;m<=12;m++) out+=row(y-1,m);
+for(let m=1;m<=8;m++) out+=row(y,m);
+return out;
+}
+
+function row(y,m){
+let k=`${y}-${String(m).padStart(2,'0')}`;
+let d=db[k]?.[selected]||{};
+return `<div>${m}월 ${d.time||d.participate||'-'}</div>`;
 }
 
 function backup(){
@@ -212,6 +227,10 @@ a.download="backup.json";
 a.click();
 }
 
+function restoreBtn(){
+document.getElementById("file").click();
+}
+
 function restore(e){
 let r=new FileReader();
 r.onload=()=>{db=JSON.parse(r.result);save();render();}
@@ -220,7 +239,6 @@ r.readAsText(e.target.files[0]);
 
 function doLogin(){
 if(id.value===ID && pw.value===PW){login=true;render();}
-else alert("로그인 실패");
 }
 
 render();
