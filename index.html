@@ -6,23 +6,28 @@
 <title>양주옥정회중 3집단 봉사기록</title>
 
 <style>
-body{font-family:sans-serif;margin:0;background:#f4f4f4}
-.container{padding:12px}
-.card{background:white;border-radius:12px;padding:12px;margin-bottom:12px}
-button{border:none;border-radius:10px;padding:12px;width:100%;margin:5px 0;font-size:15px}
-.primary{background:black;color:white}
+body{margin:0;font-family:sans-serif;background:#f4f4f4}
+.container{padding:12px;max-width:700px;margin:auto}
+
+.card{background:white;border-radius:12px;padding:12px;margin-bottom:10px}
+.title{font-weight:bold;margin-bottom:8px}
+
+button{border:none;border-radius:10px;padding:10px;font-size:14px}
+.small-btn{padding:8px;font-size:12px}
+
+.black{background:black;color:white}
 .gray{background:#ddd}
-.done{background:#000;color:#fff}
-.flex{display:flex;gap:6px}
-.flex button{flex:1}
-h3{margin:5px 0 10px}
-input{width:100%;padding:10px;margin:5px 0;border-radius:8px;border:1px solid #ccc}
-.small{font-size:13px;color:#666}
+.green{background:#4CAF50;color:white}
+.red{background:#f44336;color:white}
+.blue{background:#2196F3;color:white}
+
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:6px}
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+
 </style>
 </head>
 
 <body>
-
 <div id="app"></div>
 
 <script>
@@ -31,220 +36,195 @@ const ID="okjeong";
 const PW="6104";
 
 let db=JSON.parse(localStorage.getItem("db")||"{}");
-let members=JSON.parse(localStorage.getItem("members")||JSON.stringify([
+
+let members=[
 "엄미자","김영윤","임혁","최수림","안영옥",
 "강언용","이명희","안진호","고다롱","박명철",
 "김솔","김광태","김하윤","이동국","김금선","최성남"
-]));
-let pioneers=JSON.parse(localStorage.getItem("pioneers")||JSON.stringify([
-"엄미자","김영윤","임혁","최수림","안영옥"
-]));
+];
 
-let page="login";
+let pioneers=["엄미자","김영윤","임혁","최수림","안영옥"];
+let aux={}; // 월별 보조신청
+
+let login=false;
 let month=new Date().toISOString().slice(0,7);
+let selected="";
+let copy1=false;
+let copy2=false;
 
-function saveAll(){
-localStorage.setItem("db",JSON.stringify(db));
-localStorage.setItem("members",JSON.stringify(members));
-localStorage.setItem("pioneers",JSON.stringify(pioneers));
+function save(){localStorage.setItem("db",JSON.stringify(db));}
+
+function getType(name){
+if(pioneers.includes(name)) return "정규";
+if(aux[month]?.includes(name)) return "보조";
+return "전도인";
+}
+
+function isDone(name){
+let d=db[month]?.[name]||{};
+let t=getType(name);
+if(t==="전도인") return d.participate;
+return d.time;
 }
 
 function render(){
 
-const app=document.getElementById("app");
-
-if(page==="login"){
+if(!login){
 app.innerHTML=`
 <div class="container">
 <div class="card">
-<h3>로그인</h3>
-<input id="id" placeholder="아이디">
-<input id="pw" type="password" placeholder="비밀번호">
-<button class="primary" onclick="login()">로그인</button>
+<div class="title">로그인</div>
+<input id="id" placeholder="아이디"><br><br>
+<input id="pw" type="password" placeholder="비밀번호"><br><br>
+<button class="black" onclick="doLogin()">로그인</button>
 </div>
 </div>`;
 return;
 }
 
-if(page==="manage"){
+if(!db[month]) db[month]={};
+if(!aux[month]) aux[month]=[];
+
 app.innerHTML=`
 <div class="container">
+
 <div class="card">
-<h3>집단관리</h3>
+<div class="title">월 선택</div>
+<input type="month" value="${month}" onchange="month=this.value;render()">
+</div>
+
+<div class="card">
+<div class="title">이달의 보조P</div>
+<div class="grid">
+${members.filter(m=>!pioneers.includes(m)).map(m=>`
+<button class="${aux[month].includes(m)?'blue':'gray'} small-btn"
+onclick="toggleAux('${m}')">${m}</button>
+`).join("")}
+</div>
+</div>
+
+<div class="card">
+<div class="title">월별입력</div>
+<div class="grid">
 ${members.map(m=>`
-<div class="flex">
-<input value="${m}" onchange="editName('${m}',this.value)">
-<button onclick="removeMember('${m}')">삭제</button>
-<button onclick="togglePioneer('${m}')">${pioneers.includes(m)?"정규":"일반"}</button>
-</div>`).join("")}
-<button onclick="addMember()">+ 추가</button>
-<button onclick="back()">뒤로</button>
+<button class="${isDone(m)?'black':'gray'} small-btn"
+onclick="select('${m}')">
+${m}
+</button>
+`).join("")}
 </div>
-</div>`;
-return;
-}
 
-let data=db[month]||{};
-db[month]=data;
+${selected?drawInput():''}
 
-app.innerHTML=`
-<div class="container">
-
-<div class="card">
-<input value="${month}" onchange="setMonth(this.value)">
-<div class="small">제출률 ${calcRate()}%</div>
 </div>
 
 <div class="card">
-<h3>월별 입력</h3>
-${members.map(m=>{
-let d=data[m]||{};
-let type=d.type||(pioneers.includes(m)?"정규":"전도인");
-let done=d.done;
-
-return `<button class="${done?'done':'gray'}" onclick="input('${m}')">
-${m} (${type})
-</button>`;
-}).join("")}
+<div class="title">집단보고</div>
+<pre>${report()}</pre>
+<button class="${copy1?'black':'gray'}" onclick="copyReport()">복사</button>
 </div>
 
 <div class="card">
-<h3>집단보고</h3>
-<pre>${makeReport()}</pre>
-<button onclick="copy()">복사</button>
-</div>
-
-<div class="card">
-<h3>미제출</h3>
-${getNot().join(", ")}
-</div>
-
-<div class="card">
+<div class="title">백업 / 복원</div>
 <button onclick="backup()">백업</button>
 <input type="file" onchange="restore(event)">
 </div>
 
-<div class="card">
-<button onclick="goManage()">집단관리</button>
 </div>
+`;
+}
 
+function drawInput(){
+let t=getType(selected);
+let d=db[month][selected]||{};
+return `
+<div class="card">
+<div class="title">${selected} (${t})</div>
+
+${t==="전도인"?`
+<button onclick="setPart('${selected}','O')">참여</button>
+<button onclick="setPart('${selected}','X')">미참여</button>
+<textarea placeholder="비고" onchange="setNote('${selected}',this.value)">${d.note||''}</textarea>
+`:
+`
+<input placeholder="시간" value="${d.time||''}" onchange="setVal('${selected}','time',this.value)">
+<input placeholder="연구" value="${d.study||''}" onchange="setVal('${selected}','study',this.value)">
+<textarea placeholder="비고" onchange="setNote('${selected}',this.value)">${d.note||''}</textarea>
+`}
+
+<button class="black" onclick="save()">저장</button>
 </div>`;
 }
 
-function login(){
-if(id.value===ID && pw.value===PW){
-page="main";
-render();
-}else alert("로그인 실패");
-}
+function select(n){selected=n;render();}
 
-function input(name){
-let d=db[month][name]||{};
-let type=d.type||(pioneers.includes(name)?"정규":"전도인");
-
-if(type==="전도인"){
-d.done=!d.done;
-d.type="전도인";
-}else{
-let t=prompt("시간",d.time||"");
-if(t!==null){
-d.time=t;
-d.done=true;
-}
-if(confirm("보조로 변경?")) d.type="보조";
-else d.type="정규";
-}
-
-db[month][name]=d;
-saveAll();
+function toggleAux(n){
+if(aux[month].includes(n)) aux[month]=aux[month].filter(x=>x!==n);
+else aux[month].push(n);
 render();
 }
 
-function makeReport(){
+function setVal(n,k,v){
+if(!db[month][n]) db[month][n]={};
+db[month][n][k]=v;
+save();
+}
+
+function setPart(n,v){
+if(!db[month][n]) db[month][n]={};
+db[month][n].participate=v;
+save();
+}
+
+function setNote(n,v){
+if(!db[month][n]) db[month][n]={};
+db[month][n].note=v;
+save();
+}
+
+function report(){
 let txt="";
 members.forEach(m=>{
-let d=db[month][m];
-if(!d) return;
+let d=db[month][m]||{};
+let t=getType(m);
 
-if(d.type==="전도인"){
-if(d.done) txt+=`${m} 참여\n`;
+if(t==="전도인"){
+txt+=`${m} ${t} ${d.participate||'-'} ${d.note||''}\n`;
 }else{
-txt+=`${m} ${d.type} ${d.time||0}\n`;
+txt+=`${m} ${t} ${d.time||'-'} ${d.study||'-'} ${d.note||''}\n`;
 }
 });
 return txt;
 }
 
-function copy(){
-navigator.clipboard.writeText(makeReport());
-alert("복사됨");
-}
-
-function calcRate(){
-let total=members.length;
-let done=members.filter(m=>db[month][m]?.done).length;
-return Math.floor(done/total*100);
-}
-
-function getNot(){
-return members.filter(m=>!db[month][m]?.done);
-}
-
-function setMonth(m){
-month=m;
+function copyReport(){
+navigator.clipboard.writeText(report());
+copy1=true;
+setTimeout(()=>{copy1=false;render()},1500);
 render();
 }
 
 function backup(){
-const blob=new Blob([JSON.stringify({db,members,pioneers})],{type:'application/json'});
-const url=URL.createObjectURL(blob);
-const a=document.createElement('a');
-a.href=url;
-a.download='backup.json';
+let blob=new Blob([JSON.stringify(db)],{type:'application/json'});
+let a=document.createElement('a');
+a.href=URL.createObjectURL(blob);
+a.download="backup.json";
 a.click();
 }
 
 function restore(e){
-const r=new FileReader();
-r.onload=()=>{
-let x=JSON.parse(r.result);
-db=x.db||{};
-members=x.members||members;
-pioneers=x.pioneers||pioneers;
-saveAll();
-render();
-};
+let r=new FileReader();
+r.onload=()=>{db=JSON.parse(r.result);save();render();}
 r.readAsText(e.target.files[0]);
 }
 
-function goManage(){page="manage";render();}
-function back(){page="main";render();}
-
-function addMember(){
-let n=prompt("이름");
-if(n){members.push(n);saveAll();render();}
-}
-
-function removeMember(n){
-members=members.filter(x=>x!==n);
-saveAll();render();
-}
-
-function editName(oldName,newName){
-members=members.map(x=>x===oldName?newName:x);
-saveAll();
-}
-
-function togglePioneer(n){
-if(pioneers.includes(n)){
-pioneers=pioneers.filter(x=>x!==n);
-}else pioneers.push(n);
-saveAll();render();
+function doLogin(){
+if(id.value===ID && pw.value===PW){login=true;render();}
+else alert("로그인 실패");
 }
 
 render();
 
 </script>
-
 </body>
 </html>
