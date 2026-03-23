@@ -7,13 +7,11 @@
   <style>
     :root{
       --bg:#f3f4f6;
-      --bg2:#e5e7eb;
       --card:#ffffff;
       --text:#111827;
       --muted:#6b7280;
       --line:#e5e7eb;
-      --black:#111111;
-      --black-2:#1f2937;
+      --black:#111827;
       --green:#166534;
       --green-bg:#dcfce7;
       --red:#991b1b;
@@ -24,7 +22,7 @@
       --blue-bg:#dbeafe;
       --amber:#92400e;
       --amber-bg:#fef3c7;
-      --shadow:0 10px 30px rgba(17,24,39,.08);
+      --shadow:0 10px 28px rgba(17,24,39,.08);
     }
     *{box-sizing:border-box}
     body{
@@ -32,8 +30,8 @@
       font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;
       color:var(--text);
       background:
-        radial-gradient(circle at top left, #e0e7ff 0%, transparent 32%),
-        radial-gradient(circle at top right, #dbeafe 0%, transparent 28%),
+        radial-gradient(circle at top left, #e0e7ff 0%, transparent 30%),
+        radial-gradient(circle at top right, #dbeafe 0%, transparent 26%),
         linear-gradient(180deg, #f8fafc 0%, #f3f4f6 100%);
     }
     .shell{
@@ -43,32 +41,26 @@
     }
     .topbar{
       display:flex;
-      align-items:center;
       justify-content:space-between;
+      align-items:center;
       gap:12px;
       margin-bottom:12px;
-    }
-    .brand{
-      display:flex;
-      flex-direction:column;
-      gap:2px;
     }
     .brand h1{
       margin:0;
       font-size:22px;
-      line-height:1.2;
-      font-weight:800;
+      font-weight:900;
       letter-spacing:-.02em;
     }
     .brand p{
-      margin:0;
-      color:var(--muted);
+      margin:2px 0 0;
       font-size:12px;
+      color:var(--muted);
     }
     .card{
-      background:rgba(255,255,255,.92);
+      background:rgba(255,255,255,.94);
       backdrop-filter:blur(10px);
-      border:1px solid rgba(255,255,255,.7);
+      border:1px solid rgba(255,255,255,.8);
       border-radius:18px;
       padding:14px;
       margin-bottom:12px;
@@ -87,9 +79,9 @@
       gap:8px;
       margin:0;
       font-size:17px;
-      font-weight:800;
+      font-weight:900;
     }
-    .title-badge{
+    .badge-icon{
       width:28px;
       height:28px;
       border-radius:999px;
@@ -99,34 +91,25 @@
       background:var(--black);
       color:#fff;
       font-size:12px;
-      font-weight:800;
+      font-weight:900;
       flex:none;
     }
     .sub{
       font-size:12px;
       color:var(--muted);
     }
-    .row{
-      display:flex;
-      gap:8px;
-      flex-wrap:wrap;
-    }
-    .row > *{flex:1}
-    .row-auto{
-      display:flex;
-      gap:8px;
-      flex-wrap:wrap;
-      align-items:center;
-    }
+    .row{display:flex;gap:8px;flex-wrap:wrap}
+    .row>*{flex:1}
+    .row-auto{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
     input,select,textarea{
       width:100%;
       border:1px solid var(--line);
       background:#fff;
       border-radius:12px;
-      padding:12px 12px;
+      padding:12px;
       font-size:15px;
-      color:var(--text);
       outline:none;
+      color:var(--text);
     }
     textarea{
       min-height:86px;
@@ -141,24 +124,22 @@
       border-radius:12px;
       padding:12px 14px;
       font-size:14px;
-      font-weight:700;
+      font-weight:800;
       cursor:pointer;
-      transition:.15s ease;
       display:inline-flex;
       align-items:center;
       justify-content:center;
       gap:6px;
-      text-align:center;
+      transition:.15s ease;
     }
     button:active,.file-btn:active{transform:scale(.99)}
     .btn-black{background:var(--black);color:#fff}
     .btn-gray{background:#e5e7eb;color:#111827}
-    .btn-outline{background:#fff;color:#111827;border:1px solid var(--line)}
+    .btn-outline{background:#fff;border:1px solid var(--line);color:#111827}
     .btn-green{background:var(--green-bg);color:var(--green)}
     .btn-red{background:var(--red-bg);color:var(--red)}
     .btn-purple{background:var(--purple-bg);color:var(--purple)}
     .btn-blue{background:var(--blue-bg);color:var(--blue)}
-    .btn-soft{background:#f8fafc;color:#111827;border:1px solid var(--line)}
     .mini{
       padding:8px 10px;
       font-size:12px;
@@ -166,21 +147,19 @@
       width:auto;
       flex:none;
     }
-    .icon{
-      width:18px;height:18px;display:inline-flex;align-items:center;justify-content:center;
-      border-radius:999px;background:rgba(255,255,255,.25);font-size:11px;font-weight:800;
+    .member-grid{
+      display:grid;
+      grid-template-columns:repeat(2,1fr);
+      gap:8px;
     }
-    .grid-2{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
-    .grid-4{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
-    .member-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
     .member-btn{
       width:100%;
+      min-height:72px;
       justify-content:space-between;
       align-items:flex-start;
-      min-height:72px;
+      text-align:left;
       padding:10px 12px;
       border-radius:14px;
-      text-align:left;
     }
     .member-main{
       display:flex;
@@ -190,7 +169,7 @@
     }
     .member-name{
       font-size:14px;
-      font-weight:800;
+      font-weight:900;
       line-height:1.2;
     }
     .member-role{
@@ -198,27 +177,25 @@
       opacity:.9;
     }
     .pill{
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
       padding:5px 8px;
       border-radius:999px;
       font-size:11px;
-      font-weight:800;
+      font-weight:900;
       white-space:nowrap;
     }
     .pill-dark{background:#111827;color:#fff}
-    .pill-soft{background:rgba(255,255,255,.55);color:#111827}
+    .pill-soft{background:rgba(255,255,255,.65);color:#111827}
     .summary{
       display:grid;
       grid-template-columns:repeat(2,1fr);
       gap:8px;
+      margin-top:10px;
       margin-bottom:10px;
     }
     .summary-item{
       border-radius:16px;
       padding:12px;
-      font-weight:800;
+      font-weight:900;
     }
     .summary-item .k{
       font-size:12px;
@@ -229,17 +206,26 @@
       font-size:22px;
       line-height:1;
     }
-    .report-line,.record-line,.manage-line{
+    .line-item,.record-line,.manage-line{
       border:1px solid var(--line);
       border-radius:14px;
       padding:10px 12px;
       background:#fff;
       margin-bottom:8px;
     }
-    .report-line strong,.manage-line strong{font-size:14px}
-    .record-line{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
-    .record-left{display:flex;flex-direction:column;gap:2px}
-    .record-month{font-weight:800}
+    .line-item strong,.manage-line strong{font-size:14px}
+    .record-line{
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+      align-items:flex-start;
+    }
+    .record-left{
+      display:flex;
+      flex-direction:column;
+      gap:2px;
+    }
+    .record-month{font-weight:900}
     .record-year{font-size:11px;color:var(--muted)}
     .manage-line{
       display:flex;
@@ -247,13 +233,14 @@
       align-items:center;
       gap:8px;
     }
-    .manage-left{
-      display:flex;
-      flex-direction:column;
-      gap:2px;
-    }
-    .helper{
-      font-size:12px;color:var(--muted)
+    .helper{font-size:12px;color:var(--muted)}
+    .empty{
+      text-align:center;
+      color:var(--muted);
+      padding:14px 8px;
+      border:1px dashed var(--line);
+      border-radius:14px;
+      background:#fafafa;
     }
     .login-wrap{
       min-height:100vh;
@@ -269,7 +256,7 @@
     .login-card{
       width:100%;
       max-width:390px;
-      background:rgba(255,255,255,.95);
+      background:rgba(255,255,255,.96);
       backdrop-filter:blur(14px);
       border-radius:24px;
       padding:22px;
@@ -289,7 +276,6 @@
       font-size:13px;
       margin-bottom:14px;
     }
-    .spacer{height:6px}
     .toast{
       position:fixed;
       left:50%;
@@ -300,7 +286,7 @@
       padding:12px 14px;
       border-radius:999px;
       font-size:13px;
-      font-weight:700;
+      font-weight:800;
       opacity:0;
       pointer-events:none;
       transition:.2s ease;
@@ -312,17 +298,9 @@
       opacity:1;
       transform:translateX(-50%) translateY(0);
     }
-    .empty{
-      text-align:center;
-      color:var(--muted);
-      padding:14px 8px;
-      border:1px dashed var(--line);
-      border-radius:14px;
-      background:#fafafa;
-    }
     @media (min-width:760px){
-      .summary{grid-template-columns:repeat(4,1fr)}
       .member-grid{grid-template-columns:repeat(3,1fr)}
+      .summary{grid-template-columns:repeat(4,1fr)}
     }
   </style>
 </head>
@@ -332,10 +310,9 @@
 
 <script>
 const APP_TITLE = '양주옥정회중 3집단 봉사기록';
-const LOGIN_ID = 'okjeong';
+const LOGIN_ID = 'jw';
 const LOGIN_PW = '6104';
-const STORAGE_KEY = 'okjeong_service_final_v7';
-
+const STORAGE_KEY = 'okjeong_service_final_v8';
 const DEFAULT_MEMBERS = [
   '엄미자','김영윤','임혁','최수림','안영옥',
   '강언용','이명희','안진호','고다롱','박명철',
@@ -344,25 +321,10 @@ const DEFAULT_MEMBERS = [
 const DEFAULT_PIONEERS = ['엄미자','김영윤','임혁','최수림','안영옥'];
 const SERVICE_MONTHS = [9,10,11,12,1,2,3,4,5,6,7,8];
 
-function currentYm(){
-  const d = new Date();
-  return d.toISOString().slice(0,7);
-}
-function getCurrentServiceYear(){
-  const d = new Date();
-  const y = d.getFullYear();
-  const m = d.getMonth() + 1;
-  return m >= 9 ? y + 1 : y;
-}
-function getServiceYearFromYm(ym){
-  if(!ym || !ym.includes('-')) return getCurrentServiceYear();
-  const parts = ym.split('-').map(Number);
-  return parts[1] >= 9 ? parts[0] + 1 : parts[0];
-}
-function monthLabel(ym){
-  const [y,m] = ym.split('-');
-  return y + '년 ' + Number(m) + '월';
-}
+function currentYear(){ return new Date().getFullYear(); }
+function currentMonth(){ return new Date().getMonth() + 1; }
+function pad2(n){ return String(n).padStart(2,'0'); }
+function makeYm(y,m){ return `${y}-${pad2(m)}`; }
 function esc(v){
   return String(v ?? '')
     .replace(/&/g,'&amp;')
@@ -377,6 +339,27 @@ function toast(msg){
   el.classList.add('show');
   clearTimeout(window.__toastTimer);
   window.__toastTimer = setTimeout(()=>el.classList.remove('show'), 1400);
+}
+function getPreviousMonthDefault(){
+  const d = new Date();
+  d.setDate(1);
+  d.setMonth(d.getMonth() - 1);
+  return { year:d.getFullYear(), month:d.getMonth()+1 };
+}
+function getCurrentServiceYear(){
+  const y = currentYear();
+  const m = currentMonth();
+  return m >= 9 ? y : y - 1;
+}
+function yearOptionsForMonthFilter(){
+  const arr = [];
+  for(let y = 2024; y <= currentYear() + 1; y++) arr.push(y);
+  return arr;
+}
+function serviceYearOptions(){
+  const arr = [];
+  for(let y = 2024; y <= currentYear() + 1; y++) arr.push(y);
+  return arr;
 }
 function loadStore(){
   const raw = localStorage.getItem(STORAGE_KEY);
@@ -394,28 +377,28 @@ function loadStore(){
     records: oldDb
   };
 }
-function saveStore(){
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(store));
-  // 구버전 호환 키도 같이 저장
-  localStorage.setItem('db', JSON.stringify(store.records));
-  localStorage.setItem('aux', JSON.stringify(store.auxByMonth));
-  localStorage.setItem('members', JSON.stringify(store.members));
-  localStorage.setItem('pioneers', JSON.stringify(store.pioneers));
-}
-
 let store = loadStore();
+const prevDefault = getPreviousMonthDefault();
 let ui = {
   isAuth: false,
   page: 'main',
-  inputYm: currentYm(),
-  reportYm: currentYm(),
+  inputYear: prevDefault.year,
+  inputMonth: prevDefault.month,
+  reportYear: prevDefault.year,
+  reportMonth: prevDefault.month,
   activeName: store.members[0] || '',
   selectedPerson: '',
   selectedServiceYear: getCurrentServiceYear(),
   reportCopied: false,
   personalCopied: false
 };
-
+function saveStore(){
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(store));
+  localStorage.setItem('db', JSON.stringify(store.records));
+  localStorage.setItem('aux', JSON.stringify(store.auxByMonth));
+  localStorage.setItem('members', JSON.stringify(store.members));
+  localStorage.setItem('pioneers', JSON.stringify(store.pioneers));
+}
 function allKnownNames(){
   const set = new Set(store.members);
   Object.values(store.records || {}).forEach(monthObj=>{
@@ -423,13 +406,14 @@ function allKnownNames(){
   });
   return Array.from(set);
 }
-function ensureUiSelections(){
+function ensureSelections(){
   const known = allKnownNames();
-  if(!known.includes(ui.selectedPerson)) ui.selectedPerson = known[0] || '';
   if(!store.members.includes(ui.activeName)) ui.activeName = store.members[0] || '';
+  if(!known.includes(ui.selectedPerson)) ui.selectedPerson = known[0] || '';
 }
-ensureUiSelections();
-
+ensureSelections();
+function currentInputYm(){ return makeYm(Number(ui.inputYear), Number(ui.inputMonth)); }
+function currentReportYm(){ return makeYm(Number(ui.reportYear), Number(ui.reportMonth)); }
 function getMonthRecords(ym){
   if(!store.records[ym]) store.records[ym] = {};
   return store.records[ym];
@@ -439,8 +423,6 @@ function getAuxList(ym){
   return store.auxByMonth[ym];
 }
 function resolveType(name, ym){
-  const rec = (store.records[ym] || {})[name];
-  if(rec && rec.type) return rec.type;
   if(store.pioneers.includes(name)) return '정규';
   if(getAuxList(ym).includes(name)) return '보조';
   return '전도인';
@@ -448,15 +430,8 @@ function resolveType(name, ym){
 function ensureRecord(name, ym){
   const monthObj = getMonthRecords(ym);
   if(!monthObj[name]){
-    monthObj[name] = {
-      type: resolveType(name, ym),
-      time: '',
-      study: '',
-      participate: '',
-      note: ''
-    };
+    monthObj[name] = { time:'', study:'', participate:'', note:'' };
   }
-  if(!monthObj[name].type) monthObj[name].type = resolveType(name, ym);
   return monthObj[name];
 }
 function isSubmitted(name, ym){
@@ -466,14 +441,14 @@ function isSubmitted(name, ym){
   if(type === '전도인') return rec.participate === 'O' || rec.participate === 'X';
   return String(rec.time || '').trim() !== '';
 }
-function getNamesForReport(ym){
+function getNamesForMonth(ym){
   const set = new Set(store.members);
   Object.keys(store.records[ym] || {}).forEach(n=>set.add(n));
   return Array.from(set);
 }
 function summaryForMonth(ym){
-  const names = getNamesForReport(ym);
-  let regular = 0, auxiliary = 0, publisher = 0, participation = 0;
+  const names = getNamesForMonth(ym);
+  let regular=0, auxiliary=0, publisher=0, participation=0;
   names.forEach(name=>{
     const type = resolveType(name, ym);
     const rec = (store.records[ym] || {})[name] || {};
@@ -486,7 +461,7 @@ function summaryForMonth(ym){
       if(String(rec.time || '').trim() !== '') participation++;
     }
   });
-  return { regular, auxiliary, publisher, participation };
+  return {regular, auxiliary, publisher, participation};
 }
 function copyDone(key){
   ui[key] = true;
@@ -508,11 +483,11 @@ async function copyText(text, key){
   toast('복사 완료');
 }
 function buildGroupReportText(){
-  const ym = ui.reportYm;
-  const lines = [monthLabel(ym) + ' 집단 봉사보고'];
-  getNamesForReport(ym).forEach(name=>{
-    const type = resolveType(name, ym);
+  const ym = currentReportYm();
+  const lines = [`${ym} 집단 봉사보고`];
+  getNamesForMonth(ym).forEach(name=>{
     const rec = (store.records[ym] || {})[name] || {};
+    const type = resolveType(name, ym);
     if(type === '전도인'){
       const p = rec.participate === 'O' ? '참여' : rec.participate === 'X' ? '미참여' : '-';
       lines.push(`${name} ${type} ${p}${rec.note ? ' 비고:' + rec.note : ''}`);
@@ -520,25 +495,25 @@ function buildGroupReportText(){
       lines.push(`${name} ${type} 시간:${rec.time || '-'} 연구:${rec.study || '-'}${rec.note ? ' 비고:' + rec.note : ''}`);
     }
   });
-  return lines.join('\\n');
+  return lines.join('\n');
 }
 function buildPersonalText(){
-  const name = ui.selectedPerson;
   const sy = Number(ui.selectedServiceYear);
+  const name = ui.selectedPerson;
   const lines = [`${name} ${sy} 봉사연도`];
   SERVICE_MONTHS.forEach(m=>{
-    const y = m >= 9 ? sy - 1 : sy;
-    const ym = `${y}-${String(m).padStart(2,'0')}`;
+    const y = m >= 9 ? sy : sy + 1;
+    const ym = makeYm(y, m);
     const rec = (store.records[ym] || {})[name] || {};
-    const type = rec.type || '';
+    const type = resolveType(name, ym);
     if(type === '전도인'){
       const p = rec.participate === 'O' ? '참여' : rec.participate === 'X' ? '미참여' : '-';
-      lines.push(`${m}월 (${y}) ${type || '-'} ${p}${rec.note ? ' 비고:' + rec.note : ''}`);
+      lines.push(`${m}월 (${y}) ${type} ${p}${rec.note ? ' 비고:' + rec.note : ''}`);
     }else{
-      lines.push(`${m}월 (${y}) ${type || '-'} 시간:${rec.time || '-'} 연구:${rec.study || '-'}${rec.note ? ' 비고:' + rec.note : ''}`);
+      lines.push(`${m}월 (${y}) ${type} 시간:${rec.time || '-'} 연구:${rec.study || '-'}${rec.note ? ' 비고:' + rec.note : ''}`);
     }
   });
-  return lines.join('\\n');
+  return lines.join('\n');
 }
 function downloadBackup(){
   const blob = new Blob([JSON.stringify(store, null, 2)], {type:'application/json'});
@@ -568,7 +543,7 @@ function restoreBackup(evt){
         auxByMonth: parsed.auxByMonth || {},
         records: parsed.records || {}
       };
-      ensureUiSelections();
+      ensureSelections();
       saveStore();
       render();
       toast('복구 완료');
@@ -579,7 +554,6 @@ function restoreBackup(evt){
   };
   reader.readAsText(file);
 }
-
 function login(){
   const id = document.getElementById('login-id').value.trim();
   const pw = document.getElementById('login-pw').value.trim();
@@ -604,25 +578,23 @@ function goMain(){
   ui.page = 'main';
   render();
 }
-function setInputYm(v){
-  ui.inputYm = v || currentYm();
-  if(!store.members.includes(ui.activeName)) ui.activeName = store.members[0] || '';
-  render();
-}
-function setReportYm(v){
-  ui.reportYm = v || currentYm();
-  render();
-}
+function setInputYear(v){ ui.inputYear = Number(v); render(); }
+function setInputMonth(v){ ui.inputMonth = Number(v); render(); }
+function setReportYear(v){ ui.reportYear = Number(v); render(); }
+function setReportMonth(v){ ui.reportMonth = Number(v); render(); }
 function toggleAux(name){
-  const ym = ui.inputYm;
+  const ym = currentInputYm();
   if(store.pioneers.includes(name)) return;
-  const arr = getAuxList(ym);
-  if(arr.includes(name)) store.auxByMonth[ym] = arr.filter(x=>x!==name);
-  else store.auxByMonth[ym] = [...arr, name];
-
-  const rec = (store.records[ym] || {})[name];
-  if(rec) rec.type = resolveType(name, ym);
-
+  const list = getAuxList(ym);
+  if(list.includes(name)){
+    store.auxByMonth[ym] = list.filter(x=>x!==name);
+    const rec = (store.records[ym] || {})[name];
+    if(rec){ rec.time = ''; rec.study = ''; }
+  }else{
+    store.auxByMonth[ym] = [...list, name];
+    const rec = ensureRecord(name, ym);
+    rec.participate = '';
+  }
   saveStore();
   render();
 }
@@ -631,15 +603,13 @@ function openMember(name){
   render();
 }
 function setParticipation(v){
-  const rec = ensureRecord(ui.activeName, ui.inputYm);
-  rec.type = '전도인';
+  const rec = ensureRecord(ui.activeName, currentInputYm());
   rec.participate = v;
   saveStore();
   render();
 }
 function setField(field, value){
-  const rec = ensureRecord(ui.activeName, ui.inputYm);
-  rec.type = resolveType(ui.activeName, ui.inputYm);
+  const rec = ensureRecord(ui.activeName, currentInputYm());
   rec[field] = value;
   saveStore();
 }
@@ -667,7 +637,7 @@ function removeMember(name){
   Object.keys(store.auxByMonth).forEach(ym=>{
     store.auxByMonth[ym] = (store.auxByMonth[ym] || []).filter(x=>x!==name);
   });
-  ensureUiSelections();
+  ensureSelections();
   saveStore();
   render();
 }
@@ -683,12 +653,6 @@ function togglePioneer(name){
   saveStore();
   render();
 }
-function serviceYearOptions(){
-  const arr = [];
-  const max = Math.max(getCurrentServiceYear(), 2025);
-  for(let y = 2025; y <= max; y++) arr.push(y);
-  return arr.reverse();
-}
 
 function renderLogin(){
   return `
@@ -697,37 +661,37 @@ function renderLogin(){
         <h1 class="login-title">${APP_TITLE}</h1>
         <div class="login-sub">옥정 3집단 전용 시스템</div>
         <input id="login-id" placeholder="아이디" />
-        <div class="spacer"></div>
+        <div style="height:8px"></div>
         <input id="login-pw" type="password" placeholder="비밀번호" />
-        <div class="spacer"></div>
+        <div style="height:8px"></div>
         <button class="btn-black" style="width:100%" onclick="login()">로그인</button>
       </div>
     </div>
   `;
 }
-
 function renderManage(){
   return `
     <div class="shell">
       <div class="topbar">
         <div class="brand">
           <h1>집단관리</h1>
-          <p>성원 추가/삭제 및 정규 지정</p>
+          <p>성원 추가/삭제 · 정규 지정</p>
         </div>
         <button class="btn-black mini" onclick="goMain()">뒤로</button>
       </div>
 
       <div class="card">
         <div class="title-row">
-          <div class="title"><span class="title-badge">관</span>집단성원 관리</div>
+          <div class="title"><span class="badge-icon">관</span>집단성원 관리</div>
         </div>
         <div class="helper" style="margin-bottom:10px">정규로 지정된 성원은 보조 신청 목록에서 자동 제외됩니다.</div>
         <button class="btn-outline" style="width:100%;margin-bottom:10px" onclick="addMember()">+ 성원 추가</button>
+
         ${store.members.map(name=>`
           <div class="manage-line">
-            <div class="manage-left">
+            <div>
               <strong>${esc(name)}</strong>
-              <span class="helper">기존 기록은 유지됩니다.</span>
+              <div class="helper">기존 기록은 유지됩니다.</div>
             </div>
             <div class="row-auto">
               <button class="${store.pioneers.includes(name)?'btn-black':'btn-gray'} mini" onclick="togglePioneer('${esc(name)}')">
@@ -741,27 +705,25 @@ function renderManage(){
     </div>
   `;
 }
-
 function renderMain(){
-  ensureUiSelections();
-  const ym = ui.inputYm;
-  const reportYm = ui.reportYm;
-  const inputMonthRecords = getMonthRecords(ym);
+  ensureSelections();
+  const inputYm = currentInputYm();
+  const reportYm = currentReportYm();
   const activeName = ui.activeName;
-  const activeType = activeName ? resolveType(activeName, ym) : '';
-  const activeRec = activeName ? ensureRecord(activeName, ym) : null;
-  const auxList = getAuxList(ym);
-  const submitCount = store.members.filter(n=>isSubmitted(n, ym)).length;
+  const activeType = activeName ? resolveType(activeName, inputYm) : '';
+  const activeRec = activeName ? ensureRecord(activeName, inputYm) : null;
+  const auxList = getAuxList(inputYm);
+  const submitCount = store.members.filter(n=>isSubmitted(n, inputYm)).length;
   const submitRate = store.members.length ? Math.round(submitCount / store.members.length * 100) : 0;
-  const notSubmitted = store.members.filter(n=>!isSubmitted(n, ym));
+  const notSubmitted = store.members.filter(n=>!isSubmitted(n, inputYm));
   const reportSummary = summaryForMonth(reportYm);
-  const reportText = buildGroupReportText();
-  const allPeople = allKnownNames();
+
   const serviceYearRows = SERVICE_MONTHS.map(m=>{
-    const y = m >= 9 ? Number(ui.selectedServiceYear) - 1 : Number(ui.selectedServiceYear);
-    const key = `${y}-${String(m).padStart(2,'0')}`;
-    const rec = (store.records[key] || {})[ui.selectedPerson] || {};
-    const type = rec.type || '';
+    const sy = Number(ui.selectedServiceYear);
+    const y = m >= 9 ? sy : sy + 1;
+    const ym = makeYm(y, m);
+    const rec = (store.records[ym] || {})[ui.selectedPerson] || {};
+    const type = resolveType(ui.selectedPerson, ym);
     const detail = type === '전도인'
       ? ((rec.participate === 'O' ? '참여' : rec.participate === 'X' ? '미참여' : '-') + (rec.note ? ' / 비고: ' + rec.note : ''))
       : (`시간 ${rec.time || '-'} / 연구 ${rec.study || '-'}${rec.note ? ' / 비고: ' + rec.note : ''}`);
@@ -772,7 +734,7 @@ function renderMain(){
           <div class="record-year">${y}년</div>
         </div>
         <div style="flex:1;text-align:right">
-          <div style="font-weight:800">${type || '-'}</div>
+          <div style="font-weight:900">${type}</div>
           <div class="helper">${esc(detail)}</div>
         </div>
       </div>
@@ -780,9 +742,10 @@ function renderMain(){
   }).join('');
 
   const personalTotal = SERVICE_MONTHS.reduce((acc, m)=>{
-    const y = m >= 9 ? Number(ui.selectedServiceYear) - 1 : Number(ui.selectedServiceYear);
-    const key = `${y}-${String(m).padStart(2,'0')}`;
-    const rec = (store.records[key] || {})[ui.selectedPerson] || {};
+    const sy = Number(ui.selectedServiceYear);
+    const y = m >= 9 ? sy : sy + 1;
+    const ym = makeYm(y, m);
+    const rec = (store.records[ym] || {})[ui.selectedPerson] || {};
     acc.time += Number(rec.time || 0);
     acc.study += Number(rec.study || 0);
     return acc;
@@ -803,7 +766,7 @@ function renderMain(){
 
       <div class="card">
         <div class="title-row">
-          <div class="title"><span class="title-badge">데</span>데이터 관리</div>
+          <div class="title"><span class="badge-icon">데</span>데이터 관리</div>
         </div>
         <div class="row">
           <button class="btn-black" onclick="downloadBackup()">백업(JSON)</button>
@@ -814,12 +777,20 @@ function renderMain(){
 
       <div class="card">
         <div class="title-row">
-          <div class="title"><span class="title-badge">입</span>월별 입력</div>
-          <div class="sub">현재 선택 월 기준</div>
+          <div class="title"><span class="badge-icon">입</span>월별 입력</div>
+          <div class="sub">${inputYm}</div>
         </div>
-        <input type="month" min="2025-01" value="${esc(ym)}" onchange="setInputYm(this.value)" />
 
-        <div style="margin-top:10px" class="summary">
+        <div class="row">
+          <select onchange="setInputYear(this.value)">
+            ${yearOptionsForMonthFilter().map(y=>`<option value="${y}" ${Number(ui.inputYear)===y?'selected':''}>${y}년</option>`).join('')}
+          </select>
+          <select onchange="setInputMonth(this.value)">
+            ${Array.from({length:12}, (_,i)=>i+1).map(m=>`<option value="${m}" ${Number(ui.inputMonth)===m?'selected':''}>${m}월</option>`).join('')}
+          </select>
+        </div>
+
+        <div class="summary">
           <div class="summary-item" style="background:var(--green-bg)">
             <div class="k">제출률</div>
             <div class="v">${submitRate}%</div>
@@ -835,7 +806,7 @@ function renderMain(){
         </div>
 
         <div class="title-row" style="margin-top:6px">
-          <div class="title" style="font-size:15px"><span class="title-badge" style="background:var(--purple)">보</span>이번 달 보조P</div>
+          <div class="title" style="font-size:15px"><span class="badge-icon" style="background:var(--purple)">보</span>이달의 보조P</div>
         </div>
         <div class="row-auto" style="margin-bottom:12px">
           ${store.members.filter(n=>!store.pioneers.includes(n)).map(name=>`
@@ -845,8 +816,8 @@ function renderMain(){
 
         <div class="member-grid">
           ${store.members.map(name=>{
-            const submitted = isSubmitted(name, ym);
-            const type = resolveType(name, ym);
+            const submitted = isSubmitted(name, inputYm);
+            const type = resolveType(name, inputYm);
             return `
               <button class="member-btn ${submitted?'btn-green':'btn-red'}" onclick="openMember('${esc(name)}')">
                 <span class="member-main">
@@ -863,10 +834,10 @@ function renderMain(){
           <div class="card" style="margin:12px 0 0;background:#fafafa;border:1px solid var(--line);box-shadow:none">
             <div class="title-row">
               <div>
-                <div class="title" style="font-size:15px;margin-bottom:2px"><span class="title-badge" style="background:var(--black-2)">인</span>${esc(activeName)}</div>
+                <div class="title" style="font-size:15px;margin-bottom:2px"><span class="badge-icon">인</span>${esc(activeName)}</div>
                 <div class="sub">구분: ${activeType}</div>
               </div>
-              <span class="pill ${isSubmitted(activeName, ym)?'pill-dark':'pill-soft'}">${isSubmitted(activeName, ym)?'입력 완료':'입력 필요'}</span>
+              <span class="pill ${isSubmitted(activeName, inputYm)?'pill-dark':'pill-soft'}">${isSubmitted(activeName, inputYm)?'입력 완료':'입력 필요'}</span>
             </div>
 
             ${activeType === '전도인' ? `
@@ -890,13 +861,20 @@ function renderMain(){
 
       <div class="card">
         <div class="title-row">
-          <div class="title"><span class="title-badge">보</span>집단보고</div>
-          <div class="sub">독립 필터</div>
+          <div class="title"><span class="badge-icon">보</span>집단보고</div>
+          <div class="sub">${reportYm}</div>
         </div>
 
-        <input type="month" min="2025-01" value="${esc(reportYm)}" onchange="setReportYm(this.value)" />
+        <div class="row">
+          <select onchange="setReportYear(this.value)">
+            ${yearOptionsForMonthFilter().map(y=>`<option value="${y}" ${Number(ui.reportYear)===y?'selected':''}>${y}년</option>`).join('')}
+          </select>
+          <select onchange="setReportMonth(this.value)">
+            ${Array.from({length:12}, (_,i)=>i+1).map(m=>`<option value="${m}" ${Number(ui.reportMonth)===m?'selected':''}>${m}월</option>`).join('')}
+          </select>
+        </div>
 
-        <div class="summary" style="margin-top:10px">
+        <div class="summary">
           <div class="summary-item" style="background:var(--blue-bg)">
             <div class="k">정규</div>
             <div class="v">${reportSummary.regular}</div>
@@ -915,15 +893,15 @@ function renderMain(){
           </div>
         </div>
 
-        <div style="margin-top:10px">
-          ${getNamesForReport(reportYm).map(name=>{
+        <div>
+          ${getNamesForMonth(reportYm).map(name=>{
             const rec = (store.records[reportYm] || {})[name] || {};
             const type = resolveType(name, reportYm);
             if(type === '전도인'){
               const p = rec.participate === 'O' ? '참여' : rec.participate === 'X' ? '미참여' : '-';
-              return `<div class="report-line"><strong>${esc(name)}</strong> · ${type} · ${p}${rec.note ? ' · 비고: ' + esc(rec.note) : ''}</div>`;
+              return `<div class="line-item"><strong>${esc(name)}</strong> · ${type} · ${p}${rec.note ? ' · 비고: ' + esc(rec.note) : ''}</div>`;
             }
-            return `<div class="report-line"><strong>${esc(name)}</strong> · ${type} · 시간 ${esc(rec.time || '-')} · 연구 ${esc(rec.study || '-')} ${rec.note ? '· 비고: ' + esc(rec.note) : ''}</div>`;
+            return `<div class="line-item"><strong>${esc(name)}</strong> · ${type} · 시간 ${esc(rec.time || '-')} · 연구 ${esc(rec.study || '-')} ${rec.note ? '· 비고: ' + esc(rec.note) : ''}</div>`;
           }).join('') || `<div class="empty">해당 월 보고 데이터가 없습니다.</div>`}
         </div>
 
@@ -934,20 +912,20 @@ function renderMain(){
 
       <div class="card">
         <div class="title-row">
-          <div class="title"><span class="title-badge">개</span>개인기록</div>
+          <div class="title"><span class="badge-icon">개</span>개인기록</div>
           <div class="sub">봉사연도 9월 ~ 다음 해 8월</div>
         </div>
 
         <div class="row">
           <select onchange="ui.selectedPerson=this.value; render()">
-            ${allPeople.map(name=>`<option value="${esc(name)}" ${ui.selectedPerson===name?'selected':''}>${esc(name)}</option>`).join('')}
+            ${allKnownNames().map(name=>`<option value="${esc(name)}" ${ui.selectedPerson===name?'selected':''}>${esc(name)}</option>`).join('')}
           </select>
           <select onchange="ui.selectedServiceYear=Number(this.value); render()">
             ${serviceYearOptions().map(y=>`<option value="${y}" ${Number(ui.selectedServiceYear)===y?'selected':''}>${y} 봉사연도</option>`).join('')}
           </select>
         </div>
 
-        <div class="summary" style="margin-top:10px">
+        <div class="summary">
           <div class="summary-item" style="background:var(--amber-bg)">
             <div class="k">시간 합계</div>
             <div class="v">${personalTotal.time}</div>
@@ -958,7 +936,7 @@ function renderMain(){
           </div>
         </div>
 
-        <div style="margin-top:10px">${serviceYearRows || `<div class="empty">기록이 없습니다.</div>`}</div>
+        <div>${serviceYearRows || `<div class="empty">기록이 없습니다.</div>`}</div>
 
         <button class="${ui.personalCopied?'btn-black':'btn-gray'}" style="width:100%;margin-top:10px" onclick="copyText(buildPersonalText(),'personalCopied')">
           ${ui.personalCopied ? '복사됨' : '개인기록 복사'}
@@ -967,12 +945,10 @@ function renderMain(){
     </div>
   `;
 }
-
 function render(){
   const app = document.getElementById('app');
   app.innerHTML = ui.isAuth ? (ui.page === 'manage' ? renderManage() : renderMain()) : renderLogin();
 }
-
 render();
 </script>
 </body>
